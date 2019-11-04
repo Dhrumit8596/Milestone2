@@ -16,5 +16,7 @@ public interface Index {
     /**
      * A (sorted) list of all terms in the index vocabulary.
      */
+    List<Posting> getPostingsWithPositions(String term);
+    
     List<String> getVocabulary();
 }

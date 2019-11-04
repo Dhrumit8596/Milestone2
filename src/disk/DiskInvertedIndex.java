@@ -137,7 +137,7 @@ public class DiskInvertedIndex implements Index {
    }
 
     @Override
-    public List<Posting> getPostings(String term) {
+    public List<Posting> getPostingsWithPositions(String term) {
     
     
     long term_position = binarySearchVocabulary(term);
@@ -205,5 +205,44 @@ public class DiskInvertedIndex implements Index {
     @Override
     public List<String> getVocabulary() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public List<Posting> getPostings(String term) {
+     long term_position = binarySearchVocabulary(term);
+    
+       try {
+           mPostings.seek(term_position);
+         } catch (IOException ex) {
+           Logger.getLogger(DiskInvertedIndex.class.getName()).log(Level.SEVERE, null, ex);
+       }
+    
+    List<Posting> posting_list = new ArrayList<>();
+    byte[] byteBuffer = new byte[4];
+       try {
+           mPostings.read(byteBuffer, 0, byteBuffer.length);
+           ByteBuffer wrapped = ByteBuffer.wrap(byteBuffer);
+           int dft = wrapped.getInt();
+           int prev = 0;
+           int doc_id;
+           for(int i=0;i<dft;i++)
+           {
+               mPostings.read(byteBuffer, 0, byteBuffer.length);
+               doc_id = prev + ByteBuffer.wrap(byteBuffer).getInt();
+               prev = ByteBuffer.wrap(byteBuffer).getInt();
+               mPostings.read(byteBuffer, 0, byteBuffer.length);
+               int tftd = ByteBuffer.wrap(byteBuffer).getInt();
+               
+               int position = tftd * byteBuffer.length;
+               mPostings.skipBytes(position);
+               Posting p = new Posting(doc_id, tftd);
+               posting_list.add(p);    
+           }
+           
+       } catch (IOException ex) {
+           Logger.getLogger(DiskInvertedIndex.class.getName()).log(Level.SEVERE, null, ex);
+       }
+     
+     return posting_list;  
     }
 }

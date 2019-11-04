@@ -349,11 +349,7 @@ public class DirectorySearch extends javax.swing.JFrame {
         QueryComponent query_component = queryparser.parseQuery(query);
         int i = 0;
         
-        
-        //System.arrayCopy(index, 0, (Index)DII, 0, index.length);
-        result_docs = query_component.getPostings(index);
-        
-        //result_docs = DII.getPostings(query);
+       result_docs = query_component.getPostings(index);
         DefaultListModel<String> listModel = new DefaultListModel<>();
         ArrayList<String> documents = new ArrayList<>();
 

@@ -54,13 +54,13 @@ public class NearLiteral implements QueryComponent {
     @Override
     public List<Posting> getPostings(Index[] index) {
         String firstterm = mTerms.get(0);
-        List<Posting> result = index[0].getPostings(firstterm);
+        List<Posting> result = index[0].getPostingsWithPositions(firstterm);
         //    for (String term : mTerms) {
         //   if (term.equals(firstterm)) {
         //    continue;
         //  }
         String second_term = mTerms.get(1);
-        List<Posting> posting = index[0].getPostings(second_term);
+        List<Posting> posting = index[0].getPostingsWithPositions(second_term);
         List<Posting> temp = new ArrayList<>(result);
         result.clear();
         int i = 0, j = 0;

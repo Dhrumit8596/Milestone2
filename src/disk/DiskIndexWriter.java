@@ -49,7 +49,7 @@ public List<Long> write_posting(Index index, String path) throws IOException
     int previous_doc = 0;
     for(String str : vocab)
     {
-        List<Posting> postings = index.getPostings(str);
+        List<Posting> postings = index.getPostingsWithPositions(str);
         int dft = postings.size();
         byte[] hex_dft = ByteBuffer.allocate(4).putInt(dft).array();
         

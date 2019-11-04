@@ -70,7 +70,7 @@ public class InvertedIndex implements Index {
     }
 
     @Override
-    public List<Posting> getPostings(String term) {
+    public List<Posting> getPostingsWithPositions(String term) {
         if (map.containsKey(term)) {
             List<Posting> l = new ArrayList<>(map.get(term));
             return l;
@@ -87,6 +87,11 @@ public class InvertedIndex implements Index {
         Collections.sort(s);
 
         return s;
+    }
+
+    @Override
+    public List<Posting> getPostings(String term) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

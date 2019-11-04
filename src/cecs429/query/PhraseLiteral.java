@@ -49,14 +49,14 @@ public class PhraseLiteral implements QueryComponent {
         if (mTerms.size() == 2) {
             String biword = mTerms.get(0) + " " + mTerms.get(1);
             System.out.println(biword);
-            return index[1].getPostings(biword);
+            return index[1].getPostingsWithPositions(biword);
         }
         for (String term : mTerms) {
             if (result.isEmpty()) {
                 result = index[0].getPostings(term);
                 continue;
             }
-            List<Posting> posting = index[0].getPostings(term);
+            List<Posting> posting = index[0].getPostingsWithPositions(term);
             List<Posting> temp = new ArrayList<Posting>(result);
             result.clear();
             int i = 0, j = 0;

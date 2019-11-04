@@ -9,6 +9,7 @@ public class Posting {
 
     private int mDocumentId;
     private List<Integer> mPositionList;
+    private int mtftd;
 
     public Posting(int documentId, List<Integer> positionList) {
         mDocumentId = documentId;
@@ -18,6 +19,17 @@ public class Posting {
     public Posting(int documentId) {
         mDocumentId = documentId;
 
+    }
+    
+    public Posting(int documentID, int tftd)
+    {
+        mDocumentId = documentID;
+        mtftd = tftd;
+    }
+    
+    public int gettftd()
+    {
+        return mtftd;
     }
 
     public int getDocumentId() {
