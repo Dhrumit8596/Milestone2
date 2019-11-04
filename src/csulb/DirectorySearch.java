@@ -23,6 +23,7 @@ import java.io.Reader;
 import java.net.URI;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
@@ -399,6 +400,7 @@ public class DirectorySearch extends javax.swing.JFrame {
     private static Index[] indexCorpus(DocumentCorpus corpus) throws IOException {
 
         HashSet<String> vocabulary = new HashSet<>();
+        List<Double> doc_weights = new ArrayList<>();
         AdvancedTokenProcessor processor = new AdvancedTokenProcessor();
         InvertedIndex index = new InvertedIndex();
         InvertedIndex biword = new InvertedIndex();
@@ -406,11 +408,22 @@ public class DirectorySearch extends javax.swing.JFrame {
             EnglishTokenStream ets = new EnglishTokenStream(d.getContent());
             int term_position = 0;
             String previous = "";
+            HashMap<String, Integer> map = new HashMap<>();
             for (String s : ets.getTokens()) {
                 term_position++;
                 List<String> word = processor.processToken(s);
 
                 for (int i = 0; i < word.size(); i++) {
+                    
+                    if(map.containsKey(word.get(i)))
+                    {
+                        int count = map.get(word.get(i));
+                        map.put(word.get(i),count);
+                    }
+                    else
+                    {
+                        map.put(word.get(i), 1);
+                    }
                     index.addTerm(word.get(i), d.getId(), term_position);
 
                     if (previous != "") {
@@ -419,10 +432,23 @@ public class DirectorySearch extends javax.swing.JFrame {
                     previous = word.get(i);
 
                 }
+                
 
             }
+            double w_d_t = 0;
+            double ld =0;
+            for (HashMap.Entry<String,Integer> entry : map.entrySet())
+            {
+                int tftd = entry.getValue();
+                w_d_t = 1 + Math.log(tftd);
+                ld += (w_d_t*w_d_t);
+            }
+            ld = Math.sqrt(ld);
+            doc_weights.add(ld);
             ets.close();
         }
+        DiskIndexWriter DiskWriter = new DiskIndexWriter();
+        DiskWriter.write_doc_weights(doc_weights, "index\\");
         InvertedIndex[] i = {index, biword};
 
         return i;

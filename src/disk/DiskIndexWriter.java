@@ -128,4 +128,20 @@ public void write_vocab_table(List<Long> vocab, List<Long> posting, String path)
     
     
 }
+
+public void write_doc_weights(List<Double> doc_weights_file, String path) throws IOException
+{
+    File yourFile = new File(path+"docWeights.bin");
+    yourFile.getParentFile().mkdirs();
+    yourFile.createNewFile(); 
+    
+    RandomAccessFile docWeights = new RandomAccessFile(yourFile, "rw");
+    for(Double d : doc_weights_file)
+    {
+        byte[] v = ByteBuffer.allocate(8).putDouble(d).array();
+        docWeights.write(v, 0, v.length);
+    }
+    
+    
+}
 }

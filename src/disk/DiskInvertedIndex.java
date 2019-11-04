@@ -32,6 +32,7 @@ public class DiskInvertedIndex implements Index {
    private String mPath;
    private RandomAccessFile mVocabList;
    private RandomAccessFile mPostings;
+   private RandomAccessFile mDocWeights;
    private long[] mVocabTable;
 
    // Opens a disk inverted index that was constructed in the given path.
@@ -40,6 +41,7 @@ public class DiskInvertedIndex implements Index {
          mPath = path;
          mVocabList = new RandomAccessFile(new File(path, "vocab.bin"), "r");
          mPostings = new RandomAccessFile(new File(path, "postings.bin"), "r");
+         mDocWeights = new RandomAccessFile(new File(path, "docWeights.bin"), "r");
          mVocabTable = readVocabTable(path);
          //mFileNames = readFileNames(path);
       }
@@ -108,7 +110,7 @@ public class DiskInvertedIndex implements Index {
          
          int tableIndex = 0;
         // System.out.println((int)tableFile.length()/16*2);
-         vocabTable = new long[3632];
+         vocabTable = new long[((int)tableFile.length()/16+1)*2];
          byte[] byteBuffer = new byte[8];
          //vocabTable[0] = 9;
          
@@ -142,8 +144,7 @@ public class DiskInvertedIndex implements Index {
     
        try {
            mPostings.seek(term_position);
-          System.out.println("Position"+term_position);
-       } catch (IOException ex) {
+         } catch (IOException ex) {
            Logger.getLogger(DiskInvertedIndex.class.getName()).log(Level.SEVERE, null, ex);
        }
     
@@ -185,6 +186,20 @@ public class DiskInvertedIndex implements Index {
        }
      
      return posting_list;
+    }
+    
+    public double getdocweights_LD(int docID) throws IOException
+    {
+        
+        long weight_position = docID * 8;
+        mDocWeights.seek(weight_position);
+        byte[] byteBuffer = new byte[8];
+        mDocWeights.read(byteBuffer, 0, byteBuffer.length);
+        ByteBuffer wrapped = ByteBuffer.wrap(byteBuffer);
+        double weight = wrapped.getDouble();
+           
+        
+        return weight;
     }
 
     @Override
