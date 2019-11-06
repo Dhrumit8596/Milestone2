@@ -52,6 +52,7 @@ public class DirectorySearch extends javax.swing.JFrame {
     // private String Directorypath;
     // private Object query;
     String query;
+    private static String mPath;
     private String input;
     private List<String> listKeys;
     private DocumentCorpus corpus;
@@ -273,7 +274,7 @@ public class DirectorySearch extends javax.swing.JFrame {
         jf.showOpenDialog(this);
         File f = jf.getSelectedFile();
         String path = f.getAbsolutePath();
-
+        mPath = path;
         DirectoryInput.setText(path);
         // String Directorypath = path;
         System.out.print("Outside Button: " + path);
@@ -287,15 +288,16 @@ public class DirectorySearch extends javax.swing.JFrame {
             //DocumenCorpus corpus = DirectoryCorpus.loadJsonDirectory(Paths.get(directoryName).toAbsolutePath(), ".json");
             // System.out.print("Path inside button:  " +path);
 
-            String path = DirectoryInput.getText();
+            mPath = DirectoryInput.getText();
+            
             long startTime = System.currentTimeMillis();
-            corpus = DirectoryCorpus.loadJsonDirectory(Paths.get(path).toAbsolutePath(), ".json");
+            corpus = DirectoryCorpus.loadJsonDirectory(Paths.get(mPath).toAbsolutePath(), ".json");
             index = indexCorpus(corpus);
             DiskIndexWriter disk_writer = new DiskIndexWriter();
-            List<Long> voc_positions = disk_writer.write_posting(index[0], "index\\");
-            List<Long> vocab_positions = disk_writer.write_vocab(index[0].getVocabulary(), "index\\");
-            disk_writer.write_vocab_table(vocab_positions,voc_positions, "index\\");
-            DiskInvertedIndex DII = new DiskInvertedIndex("C:\\Docs\\Study\\SET\\Milestone2\\Milestone2\\index");
+            List<Long> voc_positions = disk_writer.write_posting(index[0], mPath+"\\index\\");
+            List<Long> vocab_positions = disk_writer.write_vocab(index[0].getVocabulary(), mPath+"\\index\\");
+            disk_writer.write_vocab_table(vocab_positions,voc_positions, mPath+"\\index\\");
+            DiskInvertedIndex DII = new DiskInvertedIndex(mPath+"\\index\\");
             DiskInvertedIndex[] i = {DII, DII};
             index =i;        
             long stopTime = System.currentTimeMillis();
@@ -409,7 +411,7 @@ public class DirectorySearch extends javax.swing.JFrame {
     }//GEN-LAST:event_endActionPerformed
 
     private static Index[] indexCorpus(DocumentCorpus corpus) throws IOException {
-
+        
         HashSet<String> vocabulary = new HashSet<>();
         List<Double> doc_weights = new ArrayList<>();
         AdvancedTokenProcessor processor = new AdvancedTokenProcessor();
@@ -459,7 +461,7 @@ public class DirectorySearch extends javax.swing.JFrame {
             ets.close();
         }
         DiskIndexWriter DiskWriter = new DiskIndexWriter();
-        DiskWriter.write_doc_weights(doc_weights, "index\\");
+        DiskWriter.write_doc_weights(doc_weights, mPath+"\\index\\");
         InvertedIndex[] i = {index, biword};
 
         return i;
