@@ -12,8 +12,10 @@ import disk.DiskIndexWriter;
 import cecs429.index.Index;
 import cecs429.index.InvertedIndex;
 import cecs429.index.Posting;
+import cecs429.index.PostingAccumulator;
 import cecs429.query.BooleanQueryParser;
 import cecs429.query.QueryComponent;
+import cecs429.query.RankedRetrievals;
 import cecs429.text.AdvancedTokenProcessor;
 import cecs429.text.EnglishTokenStream;
 import disk.DiskInvertedIndex;
@@ -348,8 +350,7 @@ public class DirectorySearch extends javax.swing.JFrame {
         BooleanQueryParser queryparser = new BooleanQueryParser();
         QueryComponent query_component = queryparser.parseQuery(query);
         int i = 0;
-        
-       result_docs = query_component.getPostings(index);
+        result_docs = query_component.getPostings(index);
         DefaultListModel<String> listModel = new DefaultListModel<>();
         ArrayList<String> documents = new ArrayList<>();
 
@@ -357,6 +358,20 @@ public class DirectorySearch extends javax.swing.JFrame {
             i++;
             listModel.addElement(corpus.getDocument(p.getDocumentId()).getTitle());
             System.out.println(i + ")" + corpus.getDocument(p.getDocumentId()).getTitle());
+        }
+        RankedRetrievals r = new RankedRetrievals(query);
+        List<PostingAccumulator> Ranking_results = new ArrayList<>();
+        try {
+            Ranking_results = r.getPostings(index);
+        } catch (IOException ex) {
+            Logger.getLogger(DirectorySearch.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        int j = 0;
+        for(PostingAccumulator p : Ranking_results)
+        {
+            j++;
+            Posting posting = p.getPosting();
+            System.out.println(j + ")" + corpus.getDocument(posting.getDocumentId()).getTitle()+" Accum value - "+ p.getAccumulator());
         }
         Document_list.setModel(listModel);
         Document_list.setVisible(true);

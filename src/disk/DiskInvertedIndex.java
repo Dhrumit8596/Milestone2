@@ -208,7 +208,7 @@ public class DiskInvertedIndex implements Index {
     }
 
     @Override
-    public List<Posting> getPostings(String term) {
+    public List<Posting> getPostingsWithoutPositions(String term) {
      long term_position = binarySearchVocabulary(term);
     
        try {

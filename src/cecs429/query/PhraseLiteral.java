@@ -53,7 +53,7 @@ public class PhraseLiteral implements QueryComponent {
         }
         for (String term : mTerms) {
             if (result.isEmpty()) {
-                result = index[0].getPostings(term);
+                result = index[0].getPostingsWithoutPositions(term);
                 continue;
             }
             List<Posting> posting = index[0].getPostingsWithPositions(term);
