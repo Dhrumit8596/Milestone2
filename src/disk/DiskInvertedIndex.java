@@ -41,8 +41,9 @@ public class DiskInvertedIndex implements Index {
          mPath = path;
          mVocabList = new RandomAccessFile(new File(path, "vocab.bin"), "r");
          mPostings = new RandomAccessFile(new File(path, "postings.bin"), "r");
-         mDocWeights = new RandomAccessFile(new File(path, "docWeights.bin"), "r");
          mVocabTable = readVocabTable(path);
+         
+         
          //mFileNames = readFileNames(path);
       }
       catch (FileNotFoundException ex) {
@@ -141,14 +142,16 @@ public class DiskInvertedIndex implements Index {
     
     
     long term_position = binarySearchVocabulary(term);
-    
+       List<Posting> posting_list = new ArrayList<>();
+       if(term_position == -1)
+           return posting_list;
        try {
            mPostings.seek(term_position);
          } catch (IOException ex) {
            Logger.getLogger(DiskInvertedIndex.class.getName()).log(Level.SEVERE, null, ex);
        }
     
-    List<Posting> posting_list = new ArrayList<>();
+ 
     byte[] byteBuffer = new byte[4];
        try {
            mPostings.read(byteBuffer, 0, byteBuffer.length);
@@ -190,7 +193,7 @@ public class DiskInvertedIndex implements Index {
     
     public double getdocweights_LD(int docID) throws IOException
     {
-        
+        mDocWeights = new RandomAccessFile(new File(mPath, "docWeights.bin"), "r");
         long weight_position = docID * 8;
         mDocWeights.seek(weight_position);
         byte[] byteBuffer = new byte[8];

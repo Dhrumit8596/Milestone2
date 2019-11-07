@@ -293,12 +293,18 @@ public class DirectorySearch extends javax.swing.JFrame {
             long startTime = System.currentTimeMillis();
             corpus = DirectoryCorpus.loadJsonDirectory(Paths.get(mPath).toAbsolutePath(), ".json");
             index = indexCorpus(corpus);
+            //writing INDEX on disk
             DiskIndexWriter disk_writer = new DiskIndexWriter();
             List<Long> voc_positions = disk_writer.write_posting(index[0], mPath+"\\index\\");
             List<Long> vocab_positions = disk_writer.write_vocab(index[0].getVocabulary(), mPath+"\\index\\");
             disk_writer.write_vocab_table(vocab_positions,voc_positions, mPath+"\\index\\");
             DiskInvertedIndex DII = new DiskInvertedIndex(mPath+"\\index\\");
-            DiskInvertedIndex[] i = {DII, DII};
+            //writing Biword on disk
+            List<Long> voc_positions_biword = disk_writer.write_posting(index[1], mPath+"\\index\\biword\\");
+            List<Long> vocab_positions_biword = disk_writer.write_vocab(index[1].getVocabulary(), mPath+"\\index\\biword\\");
+            disk_writer.write_vocab_table(vocab_positions_biword,voc_positions_biword, mPath+"\\index\\biword\\");
+            DiskInvertedIndex DII_biword = new DiskInvertedIndex(mPath+"\\index\\biword\\");
+            DiskInvertedIndex[] i = {DII, DII_biword};
             index =i;        
             long stopTime = System.currentTimeMillis();
             long elapsedTime = stopTime - startTime;
@@ -361,7 +367,7 @@ public class DirectorySearch extends javax.swing.JFrame {
             listModel.addElement(corpus.getDocument(p.getDocumentId()).getTitle());
             System.out.println(i + ")" + corpus.getDocument(p.getDocumentId()).getTitle());
         }
-        RankedRetrievals r = new RankedRetrievals(query);
+        RankedRetrievals r = new RankedRetrievals(query,mPath);
         List<PostingAccumulator> Ranking_results = new ArrayList<>();
         try {
             Ranking_results = r.getPostings(index);
@@ -440,7 +446,7 @@ public class DirectorySearch extends javax.swing.JFrame {
                     index.addTerm(word.get(i), d.getId(), term_position);
 
                     if (previous != "") {
-                        biword.addTerm(previous + " " + word.get(i), d.getId());
+                        biword.addTerm(previous + " " + word.get(i), d.getId(), term_position-1);
                     }
                     previous = word.get(i);
 

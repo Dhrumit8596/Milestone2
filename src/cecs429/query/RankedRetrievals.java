@@ -23,8 +23,10 @@ import java.util.PriorityQueue;
 public class RankedRetrievals {
     
     private String mqueries[];
-    public RankedRetrievals(String query)
+    private String mpath;
+    public RankedRetrievals(String query, String path)
     {
+        mpath = path;
         mqueries  = query.split(" ");
         AdvancedTokenProcessor processor = new AdvancedTokenProcessor(); 
         
@@ -63,7 +65,7 @@ public class RankedRetrievals {
             }
             
         }
-        DiskInvertedIndex DII = new DiskInvertedIndex("C:\\Docs\\Study\\SET\\Milestone2\\Milestone2\\index");
+        DiskInvertedIndex DII = new DiskInvertedIndex(mpath+"\\index\\");
         PriorityQueue<PostingAccumulator> PQ = new PriorityQueue<>();
         
         for(HashMap.Entry<Integer, PostingAccumulator> entry: map.entrySet())
