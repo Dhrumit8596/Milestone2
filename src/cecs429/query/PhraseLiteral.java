@@ -1,8 +1,10 @@
 package cecs429.query;
 
 import cecs429.index.Index;
+import cecs429.index.Indexes;
 import cecs429.index.Posting;
 import cecs429.text.AdvancedTokenProcessor;
+import cecs429.text.TokenProcessor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,19 +46,19 @@ public class PhraseLiteral implements QueryComponent {
     }
 
     @Override
-    public List<Posting> getPostings(Index[] index) {
+    public List<Posting> getPostings(Indexes indexes, TokenProcessor processor) {
         List<Posting> result = new ArrayList<>();
         if (mTerms.size() == 2) {
             String biword = mTerms.get(0) + " " + mTerms.get(1);
             System.out.println(biword);
-            return index[1].getPostingsWithPositions(biword);
+            return indexes.biword_index.getPostingsWithPositions(biword);
         }
         for (String term : mTerms) {
             if (result.isEmpty()) {
-                result = index[0].getPostingsWithPositions(term);
+                result = indexes.index.getPostingsWithPositions(term);
                 continue;
             }
-            List<Posting> posting = index[0].getPostingsWithPositions(term);
+            List<Posting> posting = indexes.index.getPostingsWithPositions(term);
             List<Posting> temp = new ArrayList<Posting>(result);
             result.clear();
             int i = 0, j = 0;

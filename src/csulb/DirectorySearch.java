@@ -10,6 +10,7 @@ import cecs429.documents.Document;
 import cecs429.documents.DocumentCorpus;
 import disk.DiskIndexWriter;
 import cecs429.index.Index;
+import cecs429.index.Indexes;
 import cecs429.index.InvertedIndex;
 import cecs429.index.Posting;
 import cecs429.index.PostingAccumulator;
@@ -44,7 +45,7 @@ import javax.swing.event.ListSelectionListener;
  */
 public class DirectorySearch extends javax.swing.JFrame {
 
-    private Index[] index;
+    private Indexes indexes;
     //private String path;
     //private URI path;
     // private String FileName;
@@ -57,6 +58,7 @@ public class DirectorySearch extends javax.swing.JFrame {
     private List<String> listKeys;
     private DocumentCorpus corpus;
     private List<Posting> result_docs = new ArrayList();
+    private AdvancedTokenProcessor processor = new AdvancedTokenProcessor();
 
     /**
      * Creates new form DirectorySearch
@@ -292,20 +294,21 @@ public class DirectorySearch extends javax.swing.JFrame {
             
             long startTime = System.currentTimeMillis();
             corpus = DirectoryCorpus.loadJsonDirectory(Paths.get(mPath).toAbsolutePath(), ".json");
-            index = indexCorpus(corpus);
+            indexes = indexCorpus(corpus);
+            
             //writing INDEX on disk
             DiskIndexWriter disk_writer = new DiskIndexWriter();
-            List<Long> voc_positions = disk_writer.write_posting(index[0], mPath+"\\index\\");
-            List<Long> vocab_positions = disk_writer.write_vocab(index[0].getVocabulary(), mPath+"\\index\\");
+            List<Long> voc_positions = disk_writer.write_posting(indexes.index, mPath+"\\index\\");
+            List<Long> vocab_positions = disk_writer.write_vocab(indexes.index.getVocabulary(), mPath+"\\index\\");
             disk_writer.write_vocab_table(vocab_positions,voc_positions, mPath+"\\index\\");
             DiskInvertedIndex DII = new DiskInvertedIndex(mPath+"\\index\\");
             //writing Biword on disk
-            List<Long> voc_positions_biword = disk_writer.write_posting(index[1], mPath+"\\index\\biword\\");
-            List<Long> vocab_positions_biword = disk_writer.write_vocab(index[1].getVocabulary(), mPath+"\\index\\biword\\");
+            List<Long> voc_positions_biword = disk_writer.write_posting(indexes.biword_index, mPath+"\\index\\biword\\");
+            List<Long> vocab_positions_biword = disk_writer.write_vocab(indexes.biword_index.getVocabulary(), mPath+"\\index\\biword\\");
             disk_writer.write_vocab_table(vocab_positions_biword,voc_positions_biword, mPath+"\\index\\biword\\");
             DiskInvertedIndex DII_biword = new DiskInvertedIndex(mPath+"\\index\\biword\\");
-            DiskInvertedIndex[] i = {DII, DII_biword};
-            index =i;        
+            //DiskInvertedIndex[] i = {DII, DII_biword};
+            indexes = new Indexes(DII, DII_biword);        
             long stopTime = System.currentTimeMillis();
             long elapsedTime = stopTime - startTime;
 
@@ -323,7 +326,7 @@ public class DirectorySearch extends javax.swing.JFrame {
 
         System.out.println("First 1000 words:: ");
         //  List<String> listKeys = new ArrayList<String>();
-        listKeys = index[0].getVocabulary();
+        listKeys = indexes.index.getVocabulary();
         //   System.out.println("IMplemented Vocab");
         String result = "";
         int vocab = 0;
@@ -358,7 +361,7 @@ public class DirectorySearch extends javax.swing.JFrame {
         BooleanQueryParser queryparser = new BooleanQueryParser();
         QueryComponent query_component = queryparser.parseQuery(query);
         int i = 0;
-        result_docs = query_component.getPostings(index);
+        result_docs = query_component.getPostings(indexes,processor);
         DefaultListModel<String> listModel = new DefaultListModel<>();
         ArrayList<String> documents = new ArrayList<>();
 
@@ -367,10 +370,10 @@ public class DirectorySearch extends javax.swing.JFrame {
             listModel.addElement(corpus.getDocument(p.getDocumentId()).getTitle());
             System.out.println(i + ")" + corpus.getDocument(p.getDocumentId()).getTitle());
         }
-        RankedRetrievals r = new RankedRetrievals(query,mPath);
+        RankedRetrievals r = new RankedRetrievals(query,mPath, corpus.getCorpusSize());
         List<PostingAccumulator> Ranking_results = new ArrayList<>();
         try {
-            Ranking_results = r.getPostings(index);
+            Ranking_results = r.getPostings(indexes,processor);
         } catch (IOException ex) {
             Logger.getLogger(DirectorySearch.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -416,7 +419,7 @@ public class DirectorySearch extends javax.swing.JFrame {
         System.exit(0);
     }//GEN-LAST:event_endActionPerformed
 
-    private static Index[] indexCorpus(DocumentCorpus corpus) throws IOException {
+    private static Indexes indexCorpus(DocumentCorpus corpus) throws IOException {
         
         HashSet<String> vocabulary = new HashSet<>();
         List<Double> doc_weights = new ArrayList<>();
@@ -468,7 +471,7 @@ public class DirectorySearch extends javax.swing.JFrame {
         }
         DiskIndexWriter DiskWriter = new DiskIndexWriter();
         DiskWriter.write_doc_weights(doc_weights, mPath+"\\index\\");
-        InvertedIndex[] i = {index, biword};
+        Indexes i = new Indexes(index, biword);
 
         return i;
     }

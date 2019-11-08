@@ -6,8 +6,10 @@
 package cecs429.query;
 
 import cecs429.index.Index;
+import cecs429.index.Indexes;
 import cecs429.index.Posting;
 import cecs429.text.AdvancedTokenProcessor;
+import cecs429.text.TokenProcessor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -52,15 +54,19 @@ public class NearLiteral implements QueryComponent {
     }
 
     @Override
-    public List<Posting> getPostings(Index[] index) {
+    public List<Posting> getPostings(Indexes indexes, TokenProcessor processor) {
+        List<String> s = new ArrayList(processor.processToken(mTerms.get(0)));
+        mTerms.add(0, s.get(s.size() - 1));
+        List<String> s1 = new ArrayList(processor.processToken(mTerms.get(1)));
+        mTerms.add(1,s1.get(s1.size() - 1));
         String firstterm = mTerms.get(0);
-        List<Posting> result = index[0].getPostingsWithPositions(firstterm);
+        List<Posting> result = indexes.index.getPostingsWithPositions(firstterm);
         //    for (String term : mTerms) {
         //   if (term.equals(firstterm)) {
         //    continue;
         //  }
         String second_term = mTerms.get(1);
-        List<Posting> posting = index[0].getPostingsWithPositions(second_term);
+        List<Posting> posting = indexes.index.getPostingsWithPositions(second_term);
         List<Posting> temp = new ArrayList<>(result);
         result.clear();
         int i = 0, j = 0;

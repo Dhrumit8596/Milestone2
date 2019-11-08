@@ -1,7 +1,9 @@
 package cecs429.query;
 
 import cecs429.index.Index;
+import cecs429.index.Indexes;
 import cecs429.index.Posting;
+import cecs429.text.TokenProcessor;
 import java.util.ArrayList;
 
 import java.util.List;
@@ -21,7 +23,7 @@ public class AndQuery implements QueryComponent {
     }
 
     @Override
-    public List<Posting> getPostings(Index[] index) {
+    public List<Posting> getPostings(Indexes indexes, TokenProcessor processor) {
         List<Posting> result = new ArrayList<>();
 
         List<QueryComponent> NegativeComponents = new ArrayList<>();
@@ -30,10 +32,10 @@ public class AndQuery implements QueryComponent {
 
             if (qc.gettype()) {
                 if (result.isEmpty()) {
-                    result = qc.getPostings(index);
+                    result = qc.getPostings(indexes,processor);
                     continue;
                 }
-                List<Posting> posting = qc.getPostings(index);
+                List<Posting> posting = qc.getPostings(indexes,processor);
 
                 List<Posting> temp = new ArrayList<Posting>(result);
 
@@ -57,7 +59,7 @@ public class AndQuery implements QueryComponent {
             }
         }
         for (QueryComponent qc : NegativeComponents) {
-            List<Posting> posting = qc.getPostings(index);
+            List<Posting> posting = qc.getPostings(indexes,processor);
             List<Posting> temp = new ArrayList<Posting>(result);
             result.clear();
             int i = 0, j = 0;

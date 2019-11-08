@@ -1,7 +1,9 @@
 package cecs429.query;
 
 import cecs429.index.Index;
+import cecs429.index.Indexes;
 import cecs429.index.Posting;
+import cecs429.text.TokenProcessor;
 import java.util.ArrayList;
 
 import java.util.List;
@@ -21,11 +23,11 @@ public class OrQuery implements QueryComponent {
     }
 
     @Override
-    public List<Posting> getPostings(Index[] index) {
+    public List<Posting> getPostings(Indexes indexes, TokenProcessor processor) {
         List<Posting> result = new ArrayList();
 
         for (QueryComponent qc : mComponents) {
-            List<Posting> posting = qc.getPostings(index);
+            List<Posting> posting = qc.getPostings(indexes,processor);
             if (result.isEmpty()) {
                 result.addAll(posting);
                 continue;

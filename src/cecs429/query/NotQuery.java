@@ -6,7 +6,9 @@
 package cecs429.query;
 
 import cecs429.index.Index;
+import cecs429.index.Indexes;
 import cecs429.index.Posting;
+import cecs429.text.TokenProcessor;
 import java.util.List;
 
 /**
@@ -22,8 +24,8 @@ public class NotQuery implements QueryComponent {
     }
 
     @Override
-    public List<Posting> getPostings(Index[] index) {
-        return mComponent.getPostings(index);
+    public List<Posting> getPostings(Indexes indexes, TokenProcessor processor) {
+        return mComponent.getPostings(indexes, processor);
     }
 
     @Override

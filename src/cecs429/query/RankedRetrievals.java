@@ -6,9 +6,11 @@
 package cecs429.query;
 
 import cecs429.index.Index;
+import cecs429.index.Indexes;
 import cecs429.index.Posting;
 import cecs429.index.PostingAccumulator;
 import cecs429.text.AdvancedTokenProcessor;
+import cecs429.text.TokenProcessor;
 import disk.DiskInvertedIndex;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,27 +26,27 @@ public class RankedRetrievals {
     
     private String mqueries[];
     private String mpath;
-    public RankedRetrievals(String query, String path)
+    private int msize;
+    public RankedRetrievals(String query, String path, int size)
     {
         mpath = path;
         mqueries  = query.split(" ");
-        AdvancedTokenProcessor processor = new AdvancedTokenProcessor(); 
-        
+        msize = size;
+    }
+    
+    public List<PostingAccumulator> getPostings(Indexes indexes, TokenProcessor processor) throws IOException
+    {
         for(int i =0; i<mqueries.length;i++)
         {
             List<String> s = new ArrayList(processor.processToken(mqueries[i]));
             mqueries[i] = s.get(s.size() - 1);
         }
-    }
-    
-    public List<PostingAccumulator> getPostings(Index[] index) throws IOException
-    {
         List<PostingAccumulator> results = new ArrayList<>();
         HashMap<Integer, PostingAccumulator> map = new HashMap<>();
-        double N = mqueries.length;
+        double N = (double)msize;
         for(String s : mqueries)
         {
-            List<Posting> postings = index[0].getPostingsWithoutPositions(s);
+            List<Posting> postings = indexes.index.getPostingsWithoutPositions(s);
             double dft = postings.size();
             double wqt = Math.log(1 + (N/dft));
             for(Posting p : postings)

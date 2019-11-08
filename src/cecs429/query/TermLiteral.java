@@ -1,8 +1,10 @@
 package cecs429.query;
 
 import cecs429.index.Index;
+import cecs429.index.Indexes;
 import cecs429.index.Posting;
 import cecs429.text.AdvancedTokenProcessor;
+import cecs429.text.TokenProcessor;
 import java.util.ArrayList;
 
 import java.util.List;
@@ -16,9 +18,9 @@ public class TermLiteral implements QueryComponent {
 
     public TermLiteral(String term) {
         mTerm = term;
-        AdvancedTokenProcessor processor = new AdvancedTokenProcessor();
-        List<String> s = new ArrayList(processor.processToken(term));
-        mTerm = s.get(s.size() - 1);
+//        AdvancedTokenProcessor processor = new AdvancedTokenProcessor();
+//        List<String> s = new ArrayList(processor.processToken(term));
+//        mTerm = s.get(s.size() - 1);
     }
 
     public String getTerm() {
@@ -26,8 +28,10 @@ public class TermLiteral implements QueryComponent {
     }
 
     @Override
-    public List<Posting> getPostings(Index[] index) {
-        return index[0].getPostingsWithoutPositions(mTerm);
+    public List<Posting> getPostings(Indexes indexes, TokenProcessor processor) {
+        List<String> s = new ArrayList(processor.processToken(mTerm));
+        mTerm = s.get(s.size() - 1);
+        return indexes.index.getPostingsWithoutPositions(mTerm);
     }
 
     @Override
