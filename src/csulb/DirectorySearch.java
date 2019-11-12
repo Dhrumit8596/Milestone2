@@ -66,6 +66,7 @@ public class DirectorySearch extends javax.swing.JFrame {
     private List<String> listKeys;
     private DocumentCorpus corpus;
     private List<Posting> result_docs = new ArrayList();
+    private List<PostingAccumulator> Ranking_results = new ArrayList<>();
     private AdvancedTokenProcessor processor = new AdvancedTokenProcessor();
     private RankingStrategy ranking_strategy;
 
@@ -102,8 +103,17 @@ public class DirectorySearch extends javax.swing.JFrame {
             @Override
             public void valueChanged(ListSelectionEvent e) {
                 if (!e.getValueIsAdjusting()) {
+                    
                     int Id = Document_list.getSelectedIndex();
-                    Reader r = corpus.getDocument(result_docs.get(Id).getDocumentId()).getContent();
+                    if(Id >=0)
+                {
+                    Reader r = null;
+                    if(BooleanRetrievalRadioButton.isSelected())
+                    r = corpus.getDocument(result_docs.get(Id).getDocumentId()).getContent();
+                    else
+                        if(RankedRetrievalRadioButton.isSelected())
+                            r = corpus.getDocument(Ranking_results.get(Id).getPosting().getDocumentId()).getContent();
+                        
                     Scanner s = new Scanner(r);
                     String content = "";
                     while (s.hasNextLine()) {
@@ -111,7 +121,7 @@ public class DirectorySearch extends javax.swing.JFrame {
                     }
 
                     new ResultDocument(content).setVisible(true);
-
+                }
                 }
             }
 
@@ -305,7 +315,7 @@ public class DirectorySearch extends javax.swing.JFrame {
                                     .addGroup(layout.createSequentialGroup()
                                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                                .addGap(0, 7, Short.MAX_VALUE)
+                                                .addGap(0, 4, Short.MAX_VALUE)
                                                 .addComponent(jLabel1))
                                             .addGroup(layout.createSequentialGroup()
                                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -393,7 +403,7 @@ public class DirectorySearch extends javax.swing.JFrame {
                     .addComponent(StemButton, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(end, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(SearchButton, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
+                .addContainerGap(37, Short.MAX_VALUE))
         );
 
         pack();
@@ -463,7 +473,7 @@ public class DirectorySearch extends javax.swing.JFrame {
 
     private void VocabButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_VocabButtonActionPerformed
 
-        System.out.println("First 1000 words:: ");
+        //        System.out.println("First 1000 words:: ");
         //  List<String> listKeys = new ArrayList<String>();
         listKeys = indexes.index.getVocabulary();
         //   System.out.println("IMplemented Vocab");
@@ -506,14 +516,18 @@ public class DirectorySearch extends javax.swing.JFrame {
         String query = querytext.getText();
         DefaultListModel<String> listModel = new DefaultListModel<>();
         if (BooleanRetrievalRadioButton.isSelected()) {
+            Result_field.setText("");
             BooleanQueryParser queryparser = new BooleanQueryParser();
             QueryComponent query_component = queryparser.parseQuery(query);
             int i = 0;
             result_docs = query_component.getPostings(indexes, processor);
 
             ArrayList<String> documents = new ArrayList<>();
+            System.out.println(result_docs.size());
+            System.out.println(corpus.getCorpusSize());
             for (Posting p : result_docs) {
                 i++;
+                System.out.println(p.getDocumentId());
                 listModel.addElement(corpus.getDocument(p.getDocumentId()).getTitle());
                 System.out.println(i + ")" + corpus.getDocument(p.getDocumentId()).getTitle());
             }
@@ -526,7 +540,7 @@ public class DirectorySearch extends javax.swing.JFrame {
         } else if (RankedRetrievalRadioButton.isSelected()) {
             String result = "";
             RankedRetrievals r = new RankedRetrievals(query, mPath, corpus.getCorpusSize());
-            List<PostingAccumulator> Ranking_results = new ArrayList<>();
+            
             try {
                 Ranking_results = r.getPostings(indexes, processor, ranking_strategy);
             } catch (IOException ex) {
@@ -651,7 +665,7 @@ public class DirectorySearch extends javax.swing.JFrame {
 
     private void QueryIndexButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_QueryIndexButtonActionPerformed
         // TODO add your handling code here:
-        mPath = DirectoryInput.getText();
+         mPath = DirectoryInput.getText();
         corpus = DirectoryCorpus.loadJsonDirectory(Paths.get(mPath).toAbsolutePath(), ".json");
         System.out.println(corpus.getCorpusSize());
         DiskInvertedIndex DII = new DiskInvertedIndex(mPath + "\\index\\");

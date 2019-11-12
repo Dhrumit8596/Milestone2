@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -92,7 +93,7 @@ public class DiskInvertedIndex implements Index {
                     "r");
 
            int tableIndex = 0;
-            vocabTable = new long[((int) tableFile.length() / 16 + 1) * 2];
+            vocabTable = new long[((int) tableFile.length() / 16) * 2];
             byte[] byteBuffer = new byte[8];
            
             while (tableFile.read(byteBuffer, 0, byteBuffer.length) > 0) { // while we keep reading 4 bytes
@@ -221,20 +222,63 @@ public class DiskInvertedIndex implements Index {
 
     @Override
     public List<String> getVocabulary() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        List<String> vocab = new ArrayList<>(); 
+        int i = 0, j = mVocabTable.length / 2 - 1;
+        while(i<=j)
+        {   
+                
+                long vListPosition = mVocabTable[i * 2];
+                int termLength = 0;
+                if (i == mVocabTable.length / 2 - 1) {
+                    try {
+                        termLength = (int) (mVocabList.length() - mVocabTable[i * 2]);
+                    } catch (IOException ex) {
+                        Logger.getLogger(DiskInvertedIndex.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                } else {
+                    termLength = (int) (mVocabTable[(i + 1) * 2] - vListPosition);
+                }
+
+            try {
+                mVocabList.seek(vListPosition);
+            } catch (IOException ex) {
+                Logger.getLogger(DiskInvertedIndex.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+                byte[] buffer = new byte[termLength];
+            try {
+                mVocabList.read(buffer, 0, termLength);
+            } catch (IOException ex) {
+                Logger.getLogger(DiskInvertedIndex.class.getName()).log(Level.SEVERE, null, ex);
+            }
+                String fileTerm = null;
+            try {
+                fileTerm = new String(buffer, "ASCII");
+            } catch (UnsupportedEncodingException ex) {
+                Logger.getLogger(DiskInvertedIndex.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            vocab.add(fileTerm);
+            i++;
+            
+        }
+        return vocab;
     }
 
     @Override
     public List<Posting> getPostingsWithoutPositions(String term) {
         long term_position = binarySearchVocabulary(term);
-
+        List<Posting> posting_list = new ArrayList<>();
+        if (term_position == -1) {
+            return posting_list;
+        }
         try {
             mPostings.seek(term_position);
         } catch (IOException ex) {
             Logger.getLogger(DiskInvertedIndex.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        List<Posting> posting_list = new ArrayList<>();
+        
         byte[] byteBuffer = new byte[4];
         try {
             mPostings.read(byteBuffer, 0, byteBuffer.length);
