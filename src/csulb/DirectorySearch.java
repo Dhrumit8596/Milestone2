@@ -5,6 +5,7 @@
  */
 package csulb;
 
+import RankedRetrieval.DefaultRanking;
 import cecs429.documents.DirectoryCorpus;
 import cecs429.documents.Document;
 import cecs429.documents.DocumentCorpus;
@@ -16,7 +17,8 @@ import cecs429.index.Posting;
 import cecs429.index.PostingAccumulator;
 import cecs429.query.BooleanQueryParser;
 import cecs429.query.QueryComponent;
-import cecs429.query.RankedRetrievals;
+import RankedRetrieval.RankedRetrievals;
+import RankedRetrieval.RankingStrategy;
 import cecs429.text.AdvancedTokenProcessor;
 import cecs429.text.EnglishTokenStream;
 import disk.DiskInvertedIndex;
@@ -371,9 +373,11 @@ public class DirectorySearch extends javax.swing.JFrame {
             System.out.println(i + ")" + corpus.getDocument(p.getDocumentId()).getTitle());
         }
         RankedRetrievals r = new RankedRetrievals(query,mPath, corpus.getCorpusSize());
+        DiskInvertedIndex DII = new DiskInvertedIndex(mPath+"\\index\\");
         List<PostingAccumulator> Ranking_results = new ArrayList<>();
         try {
-            Ranking_results = r.getPostings(indexes,processor);
+            RankingStrategy ranking_strategy = new DefaultRanking(DII);
+            Ranking_results = r.getPostings(indexes,processor, ranking_strategy);
         } catch (IOException ex) {
             Logger.getLogger(DirectorySearch.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -422,12 +426,20 @@ public class DirectorySearch extends javax.swing.JFrame {
     private static Indexes indexCorpus(DocumentCorpus corpus) throws IOException {
         
         HashSet<String> vocabulary = new HashSet<>();
-        List<Double> doc_weights = new ArrayList<>();
+        List<Double> doc_weights_file = new ArrayList<>();
+        double doc_weight = 0;
+        double doc_length = 0;
+        double byte_size = 0;
+        double avg_tftd = 0;
+        double doc_length_a = 0;
+        double total_length_tftd = 0;
         AdvancedTokenProcessor processor = new AdvancedTokenProcessor();
         InvertedIndex index = new InvertedIndex();
         InvertedIndex biword = new InvertedIndex();
         for (Document d : corpus.getDocuments()) {
             EnglishTokenStream ets = new EnglishTokenStream(d.getContent());
+            File doc = new File(d.getFilePath().toString());
+            byte_size = (double)doc.length();
             int term_position = 0;
             String previous = "";
             HashMap<String, Integer> map = new HashMap<>();
@@ -457,20 +469,31 @@ public class DirectorySearch extends javax.swing.JFrame {
                 
 
             }
+            doc_length = (double)term_position;
             double w_d_t = 0;
             double ld =0;
+            double total_tftd = 0;
             for (HashMap.Entry<String,Integer> entry : map.entrySet())
             {
                 int tftd = entry.getValue();
+                total_tftd += tftd;
                 w_d_t = 1 + Math.log(tftd);
                 ld += (w_d_t*w_d_t);
             }
             ld = Math.sqrt(ld);
-            doc_weights.add(ld);
+            doc_weight = ld;
+            total_length_tftd += total_tftd; 
+            avg_tftd = total_tftd/(double)map.size();
+            doc_weights_file.add(doc_weight);
+            doc_weights_file.add(doc_length);
+            doc_weights_file.add(byte_size);
+            doc_weights_file.add(avg_tftd);
             ets.close();
         }
+        doc_length_a = total_length_tftd/(double)corpus.getCorpusSize();
+        doc_weights_file.add(doc_length_a);
         DiskIndexWriter DiskWriter = new DiskIndexWriter();
-        DiskWriter.write_doc_weights(doc_weights, mPath+"\\index\\");
+        DiskWriter.write_doc_weights(doc_weights_file, mPath+"\\index\\");
         Indexes i = new Indexes(index, biword);
 
         return i;

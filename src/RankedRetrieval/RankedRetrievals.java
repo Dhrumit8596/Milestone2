@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cecs429.query;
+package RankedRetrieval;
 
 import cecs429.index.Index;
 import cecs429.index.Indexes;
@@ -34,7 +34,7 @@ public class RankedRetrievals {
         msize = size;
     }
     
-    public List<PostingAccumulator> getPostings(Indexes indexes, TokenProcessor processor) throws IOException
+    public List<PostingAccumulator> getPostings(Indexes indexes, TokenProcessor processor, RankingStrategy rank_strategy) throws IOException
     {
         for(int i =0; i<mqueries.length;i++)
         {
@@ -48,10 +48,11 @@ public class RankedRetrievals {
         {
             List<Posting> postings = indexes.index.getPostingsWithoutPositions(s);
             double dft = postings.size();
-            double wqt = Math.log(1 + (N/dft));
+            double wqt = rank_strategy.getWQT(N, dft);
             for(Posting p : postings)
             {
-                double wdt = 1 + Math.log(p.gettftd());
+                double tftd = p.gettftd();
+                double wdt = rank_strategy.getWDT(tftd, p.getDocumentId());
                 double increment = wdt * wqt;
                 if(map.containsKey(p.getDocumentId()))
                 {

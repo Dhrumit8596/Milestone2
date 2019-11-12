@@ -16,9 +16,6 @@ import java.nio.ByteBuffer;
 
 import java.util.*;
 
-
-
-
 import cecs429.index.Index;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -194,7 +191,7 @@ public class DiskInvertedIndex implements Index {
     public double getdocweights_LD(int docID) throws IOException
     {
         mDocWeights = new RandomAccessFile(new File(mPath, "docWeights.bin"), "r");
-        long weight_position = docID * 8;
+        long weight_position = docID * 8 * 4;
         mDocWeights.seek(weight_position);
         byte[] byteBuffer = new byte[8];
         mDocWeights.read(byteBuffer, 0, byteBuffer.length);
@@ -204,7 +201,56 @@ public class DiskInvertedIndex implements Index {
         
         return weight;
     }
+    public double getdocLength(int docID) throws FileNotFoundException, IOException
+    {
+        mDocWeights = new RandomAccessFile(new File(mPath, "docWeights.bin"), "r");
+        long weight_position = (docID+1) * 8 * 4;
+        mDocWeights.seek(weight_position);
+        byte[] byteBuffer = new byte[8];
+        mDocWeights.read(byteBuffer, 0, byteBuffer.length);
+        ByteBuffer wrapped = ByteBuffer.wrap(byteBuffer);
+        double doclength = wrapped.getDouble();
+           
+        
+        return doclength;
+    }
+    public double getbyteSize(int docID) throws FileNotFoundException, IOException
+    {
+        mDocWeights = new RandomAccessFile(new File(mPath, "docWeights.bin"), "r");
+        long weight_position = (docID+2) * 8 * 4;
+        mDocWeights.seek(weight_position);
+        byte[] byteBuffer = new byte[8];
+        mDocWeights.read(byteBuffer, 0, byteBuffer.length);
+        ByteBuffer wrapped = ByteBuffer.wrap(byteBuffer);
+        double bytesize = wrapped.getDouble();
+           
+        
+        return bytesize;
+    }
 
+    public double getavgTftd(int docID) throws FileNotFoundException, IOException
+    {
+        mDocWeights = new RandomAccessFile(new File(mPath, "docWeights.bin"), "r");
+        long weight_position = (docID+3) * 8 * 4;
+        mDocWeights.seek(weight_position);
+        byte[] byteBuffer = new byte[8];
+        mDocWeights.read(byteBuffer, 0, byteBuffer.length);
+        ByteBuffer wrapped = ByteBuffer.wrap(byteBuffer);
+        double avgTftd = wrapped.getDouble();
+        return avgTftd;
+    }
+    
+    public double getdocLengthA() throws FileNotFoundException, IOException
+    {
+        mDocWeights = new RandomAccessFile(new File(mPath, "docWeights.bin"), "r");
+        long position = mDocWeights.length() - 8;
+        mDocWeights.seek(position);
+        byte[] byteBuffer = new byte[8];
+        mDocWeights.read(byteBuffer, 0, byteBuffer.length);
+        ByteBuffer wrapped = ByteBuffer.wrap(byteBuffer);
+        double docLengthA = wrapped.getDouble();
+        return docLengthA;
+    }
     @Override
     public List<String> getVocabulary() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
