@@ -512,8 +512,11 @@ public class DirectorySearch extends javax.swing.JFrame {
             result_docs = query_component.getPostings(indexes, processor);
 
             ArrayList<String> documents = new ArrayList<>();
+            System.out.println(result_docs.size());
+            System.out.println(corpus.getCorpusSize());
             for (Posting p : result_docs) {
                 i++;
+                System.out.println(p.getDocumentId());
                 listModel.addElement(corpus.getDocument(p.getDocumentId()).getTitle());
                 System.out.println(i + ")" + corpus.getDocument(p.getDocumentId()).getTitle());
             }

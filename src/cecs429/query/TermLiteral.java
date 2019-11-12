@@ -31,7 +31,7 @@ public class TermLiteral implements QueryComponent {
     public List<Posting> getPostings(Indexes indexes, TokenProcessor processor) {
         List<String> s = new ArrayList(processor.processToken(mTerm));
         mTerm = s.get(s.size() - 1);
-        return indexes.index.getPostingsWithoutPositions(mTerm);
+        return indexes.index.getPostingsWithPositions(mTerm);
     }
 
     @Override

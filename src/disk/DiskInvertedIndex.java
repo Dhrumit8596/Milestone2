@@ -268,14 +268,17 @@ public class DiskInvertedIndex implements Index {
     @Override
     public List<Posting> getPostingsWithoutPositions(String term) {
         long term_position = binarySearchVocabulary(term);
-
+        List<Posting> posting_list = new ArrayList<>();
+        if (term_position == -1) {
+            return posting_list;
+        }
         try {
             mPostings.seek(term_position);
         } catch (IOException ex) {
             Logger.getLogger(DiskInvertedIndex.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        List<Posting> posting_list = new ArrayList<>();
+        
         byte[] byteBuffer = new byte[4];
         try {
             mPostings.read(byteBuffer, 0, byteBuffer.length);
