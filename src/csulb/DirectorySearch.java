@@ -680,7 +680,6 @@ public class DirectorySearch extends javax.swing.JFrame {
         ButtonGroup group = new ButtonGroup();
         group.add(RankedRetrievalRadioButton);
         group.add(BooleanRetrievalRadioButton);
-
     }//GEN-LAST:event_QueryIndexButtonActionPerformed
 
     private static Indexes indexCorpus(DocumentCorpus corpus) throws IOException {
