@@ -463,7 +463,7 @@ public class DirectorySearch extends javax.swing.JFrame {
 
     private void VocabButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_VocabButtonActionPerformed
 
-        System.out.println("First 1000 words:: ");
+        //        System.out.println("First 1000 words:: ");
         //  List<String> listKeys = new ArrayList<String>();
         listKeys = indexes.index.getVocabulary();
         //   System.out.println("IMplemented Vocab");
@@ -653,7 +653,6 @@ public class DirectorySearch extends javax.swing.JFrame {
         // TODO add your handling code here:
         mPath = DirectoryInput.getText();
         corpus = DirectoryCorpus.loadJsonDirectory(Paths.get(mPath).toAbsolutePath(), ".json");
-        System.out.println(corpus.getCorpusSize());
         DiskInvertedIndex DII = new DiskInvertedIndex(mPath + "\\index\\");
         DiskInvertedIndex DII_biword = new DiskInvertedIndex(mPath + "\\index\\biword\\");
         indexes = new Indexes(DII, DII_biword);
