@@ -22,6 +22,7 @@ import RankedRetrieval.RankingStrategy;
 import cecs429.text.AdvancedTokenProcessor;
 import cecs429.text.EnglishTokenStream;
 import disk.DiskInvertedIndex;
+import java.awt.Component;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
@@ -34,7 +35,9 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.ButtonGroup;
 import javax.swing.DefaultListModel;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JList;
@@ -61,13 +64,36 @@ public class DirectorySearch extends javax.swing.JFrame {
     private DocumentCorpus corpus;
     private List<Posting> result_docs = new ArrayList();
     private AdvancedTokenProcessor processor = new AdvancedTokenProcessor();
-
+    
     /**
      * Creates new form DirectorySearch
      */
     public DirectorySearch() {
         initComponents();
+        VocabButton.setVisible(false); 
+        SearchButton.setVisible(false);
+      //VocabButton.setVisible(true);
+        StemButton.setVisible(false);
+        Result_field.setVisible(false);
+        end.setVisible(false);
+        querytext.setVisible(false);
+     //Document_list.setVisible(false);
+        QueryLabel.setVisible(false);
+        ResultLabel.setVisible(false);
+      //jlist.setVisible(false);
         Document_list.setVisible(false);
+        jScrollPane1.setVisible(false);
+        jScrollPane2.setVisible(false);
+        BooleanRetrievalRadioButton.setVisible(false);
+        RankedRetrievalRadioButton.setVisible(false);
+        Document_list.setVisible(false);
+        //jComboBox1.setVisible(false);
+        DefaultRadioButton.setVisible(false);
+        Tf_IdfRadioButton.setVisible(false);
+        OkapiBM25RadioButton.setVisible(false);
+        WackyRadioButton.setVisible(false);
+        RetrievalLabel.setVisible(false);
+        
         Document_list.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
@@ -100,19 +126,27 @@ public class DirectorySearch extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         DirectorySelectionButton = new javax.swing.JButton();
         DirectoryInput = new javax.swing.JTextField();
-        IndexButton = new javax.swing.JButton();
+        BuildIndexButton = new javax.swing.JButton();
         VocabButton = new javax.swing.JButton();
         StemButton = new javax.swing.JButton();
-        jButton1 = new javax.swing.JButton();
+        SearchButton = new javax.swing.JButton();
         querytext = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
-        Document_list = new javax.swing.JList<>();
+        Document_list = new javax.swing.JList<String>();
         jScrollPane2 = new javax.swing.JScrollPane();
         Result_field = new javax.swing.JTextArea();
         end = new javax.swing.JButton();
-        jLabel2 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
+        QueryLabel = new javax.swing.JLabel();
+        ResultLabel = new javax.swing.JLabel();
         document_no = new javax.swing.JLabel();
+        QueryIndexButton = new javax.swing.JButton();
+        BooleanRetrievalRadioButton = new javax.swing.JRadioButton();
+        RankedRetrievalRadioButton = new javax.swing.JRadioButton();
+        DefaultRadioButton = new javax.swing.JRadioButton();
+        Tf_IdfRadioButton = new javax.swing.JRadioButton();
+        OkapiBM25RadioButton = new javax.swing.JRadioButton();
+        WackyRadioButton = new javax.swing.JRadioButton();
+        RetrievalLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -134,10 +168,10 @@ public class DirectorySearch extends javax.swing.JFrame {
             }
         });
 
-        IndexButton.setText("Index");
-        IndexButton.addActionListener(new java.awt.event.ActionListener() {
+        BuildIndexButton.setText("Build Index");
+        BuildIndexButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                IndexButtonActionPerformed(evt);
+                BuildIndexButtonActionPerformed(evt);
             }
         });
 
@@ -155,10 +189,10 @@ public class DirectorySearch extends javax.swing.JFrame {
             }
         });
 
-        jButton1.setText("Search");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        SearchButton.setText("Search");
+        SearchButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                SearchButtonActionPerformed(evt);
             }
         });
 
@@ -169,10 +203,10 @@ public class DirectorySearch extends javax.swing.JFrame {
             }
         });
 
-        Document_list.setModel(new javax.swing.AbstractListModel<String>() {
+        Document_list.setModel(new javax.swing.AbstractListModel() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
+            public Object getElementAt(int i) { return strings[i]; }
         });
         jScrollPane1.setViewportView(Document_list);
 
@@ -187,9 +221,35 @@ public class DirectorySearch extends javax.swing.JFrame {
             }
         });
 
-        jLabel2.setText("Query");
+        QueryLabel.setText("Query");
 
-        jLabel3.setText("Result");
+        ResultLabel.setText("Result");
+
+        QueryIndexButton.setText("Query Index");
+
+        BooleanRetrievalRadioButton.setText("Boolean Retrieval");
+        BooleanRetrievalRadioButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                BooleanRetrievalRadioButtonActionPerformed(evt);
+            }
+        });
+
+        RankedRetrievalRadioButton.setText("Ranked Retrieval");
+        RankedRetrievalRadioButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                RankedRetrievalRadioButtonActionPerformed(evt);
+            }
+        });
+
+        DefaultRadioButton.setText("Default");
+
+        Tf_IdfRadioButton.setText("Tf - Idf");
+
+        OkapiBM25RadioButton.setText("Okapi BM25");
+
+        WackyRadioButton.setText("Wacky");
+
+        RetrievalLabel.setText("Select one of the Method");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -199,38 +259,67 @@ public class DirectorySearch extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(24, 24, 24)
-                        .addComponent(IndexButton, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(85, 85, 85)
+                        .addGap(39, 39, 39)
                         .addComponent(VocabButton)
-                        .addGap(72, 72, 72)
-                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 231, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(150, 150, 150)
+                        .addComponent(SearchButton, javax.swing.GroupLayout.PREFERRED_SIZE, 231, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(132, 132, 132)
                         .addComponent(StemButton, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(82, 82, 82)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(end, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(66, 66, 66))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(document_no, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                            .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                        .addGap(0, 0, Short.MAX_VALUE)
-                                        .addComponent(jLabel1))
                                     .addGroup(layout.createSequentialGroup()
                                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(jLabel3)
-                                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                        .addGap(0, 0, Short.MAX_VALUE)))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(querytext, javax.swing.GroupLayout.PREFERRED_SIZE, 801, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                                .addGap(0, 7, Short.MAX_VALUE)
+                                                .addComponent(jLabel1))
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                    .addComponent(ResultLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                    .addComponent(RetrievalLabel))
+                                                .addGap(0, 0, Short.MAX_VALUE)))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
                                     .addGroup(layout.createSequentialGroup()
-                                        .addComponent(DirectoryInput, javax.swing.GroupLayout.PREFERRED_SIZE, 686, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(DirectorySelectionButton))
-                                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 801, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                        .addGap(8, 8, 8)
+                                        .addComponent(QueryLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(layout.createSequentialGroup()
+                                            .addComponent(DirectoryInput, javax.swing.GroupLayout.PREFERRED_SIZE, 686, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                            .addComponent(DirectorySelectionButton))
+                                        .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 801, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(querytext, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 801, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addGap(136, 136, 136)
+                                                .addComponent(BuildIndexButton))
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addGap(115, 115, 115)
+                                                .addComponent(BooleanRetrievalRadioButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                                .addComponent(DefaultRadioButton)
+                                                .addGap(76, 76, 76)
+                                                .addComponent(Tf_IdfRadioButton)
+                                                .addGap(9, 9, 9)))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                                    .addComponent(QueryIndexButton)
+                                                    .addComponent(OkapiBM25RadioButton))
+                                                .addGap(46, 46, 46)
+                                                .addComponent(WackyRadioButton)
+                                                .addGap(302, 302, 302))
+                                            .addComponent(RankedRetrievalRadioButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                                .addGap(10, 10, 10)))
                         .addContainerGap())
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING)))
         );
@@ -242,18 +331,30 @@ public class DirectorySearch extends javax.swing.JFrame {
                     .addComponent(DirectoryInput, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(DirectorySelectionButton)
                     .addComponent(jLabel1))
-                .addGap(58, 58, 58)
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(BuildIndexButton, javax.swing.GroupLayout.DEFAULT_SIZE, 38, Short.MAX_VALUE)
+                    .addComponent(QueryIndexButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(22, 22, 22)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(querytext, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(49, 49, 49)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(63, 63, 63)
-                        .addComponent(jLabel3)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 56, Short.MAX_VALUE)
+                    .addComponent(RankedRetrievalRadioButton)
+                    .addComponent(BooleanRetrievalRadioButton)
+                    .addComponent(RetrievalLabel))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(DefaultRadioButton)
+                    .addComponent(Tf_IdfRadioButton)
+                    .addComponent(OkapiBM25RadioButton)
+                    .addComponent(WackyRadioButton))
+                .addGap(43, 43, 43)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(QueryLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(querytext, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(25, 25, 25)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(ResultLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(41, 41, 41)
                 .addComponent(document_no)
@@ -262,8 +363,7 @@ public class DirectorySearch extends javax.swing.JFrame {
                     .addComponent(VocabButton, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(StemButton, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(end, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(IndexButton, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(SearchButton, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
 
@@ -282,10 +382,12 @@ public class DirectorySearch extends javax.swing.JFrame {
         DirectoryInput.setText(path);
         // String Directorypath = path;
         System.out.print("Outside Button: " + path);
+        
+        
 
     }//GEN-LAST:event_DirectorySelectionButtonActionPerformed
 
-    private void IndexButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_IndexButtonActionPerformed
+    private void BuildIndexButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BuildIndexButtonActionPerformed
         try {
             // TODO add your handling code here:
             //  String directoryName = query.substring(5);
@@ -313,19 +415,26 @@ public class DirectorySearch extends javax.swing.JFrame {
             indexes = new Indexes(DII, DII_biword);        
             long stopTime = System.currentTimeMillis();
             long elapsedTime = stopTime - startTime;
-
             document_no.setText("Total time elapsed for indexing : " + elapsedTime / 1000 + " secs");
 
             // AdvancedTokenProcessor processor = new AdvancedTokenProcessor();
             String query;
-
+          
+        BooleanRetrievalRadioButton.setVisible(true);
+        RankedRetrievalRadioButton.setVisible(true);
+        RetrievalLabel.setVisible(true);
+               
+        ButtonGroup group = new ButtonGroup();
+        group.add(RankedRetrievalRadioButton);
+        group.add(BooleanRetrievalRadioButton);
+        
         } catch (IOException ex) {
             Logger.getLogger(DirectorySearch.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }//GEN-LAST:event_IndexButtonActionPerformed
+    }//GEN-LAST:event_BuildIndexButtonActionPerformed
 
     private void VocabButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_VocabButtonActionPerformed
-
+        
         System.out.println("First 1000 words:: ");
         //  List<String> listKeys = new ArrayList<String>();
         listKeys = indexes.index.getVocabulary();
@@ -339,26 +448,33 @@ public class DirectorySearch extends javax.swing.JFrame {
             }
         }
         Result_field.setText(result);
-
+     //   Result_field.setVisible(false);
+      //  VocabButton.setVisible(false);
     }//GEN-LAST:event_VocabButtonActionPerformed
 
     private void StemButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_StemButtonActionPerformed
         // TODO add your handling code here:
         // BooleanQueryParser queryparser = new BooleanQueryParser();
+      // StemButton.setVisible(false);
+
         String input = querytext.getText();
         AdvancedTokenProcessor processor = new AdvancedTokenProcessor();
+        
         //String stemmingWord = query.substring(4).trim();
 
         String result = processor.stem(input);
         Result_field.setText(result);
+        
+      //  StemButton.setVisible(false);
     }//GEN-LAST:event_StemButtonActionPerformed
 
     private void DirectoryInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DirectoryInputActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_DirectoryInputActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void SearchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SearchButtonActionPerformed
         // TODO add your handling code here:
+        
         String query = querytext.getText();
         BooleanQueryParser queryparser = new BooleanQueryParser();
         QueryComponent query_component = queryparser.parseQuery(query);
@@ -390,6 +506,7 @@ public class DirectorySearch extends javax.swing.JFrame {
         }
         Document_list.setModel(listModel);
         Document_list.setVisible(true);
+        jScrollPane2.setVisible(true);
         if (i == 0) {
             document_no.setText("No Match Found for word \"" + query + "\".");
             //System.out.println("No Match Found for word \"" + query + "\".");
@@ -411,8 +528,11 @@ public class DirectorySearch extends javax.swing.JFrame {
                 }*/
         }
         
+      //   SearchButton.setVisible(false);
+       //    Result_field.setVisible(true);
+     //    Document_list.setVisible(true);
         
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_SearchButtonActionPerformed
 
     private void querytextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_querytextActionPerformed
         // TODO add your handling code here:
@@ -423,6 +543,69 @@ public class DirectorySearch extends javax.swing.JFrame {
         System.exit(0);
     }//GEN-LAST:event_endActionPerformed
 
+    private void BooleanRetrievalRadioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BooleanRetrievalRadioButtonActionPerformed
+        // TODO add your handling code here:
+        if(BooleanRetrievalRadioButton.isSelected()){
+        BooleanRetrievalRadioButton.setSelected(true);
+        VocabButton.setVisible(true); 
+        SearchButton.setVisible(true);
+      //VocabButton.setVisible(true);
+        StemButton.setVisible(true);
+        Result_field.setVisible(true);
+        end.setVisible(true);
+        querytext.setVisible(true);
+     //Document_list.setVisible(false);
+        QueryLabel.setVisible(true);
+        ResultLabel.setVisible(true);
+      //jlist.setVisible(false);
+     //Document_list.setVisible(true);
+      //  jScrollPane1.setVisible(true);
+        jScrollPane2.setVisible(true);
+        
+     //   BooleanRetrievalRadioButton.setVisible(false);
+      //  RankedRetrievalRadioButton.setVisible(false);
+     //   Document_list.setVisible(true);
+        DefaultRadioButton.setVisible(false);
+        Tf_IdfRadioButton.setVisible(false);
+        OkapiBM25RadioButton.setVisible(false);
+        WackyRadioButton.setVisible(false);
+        }
+        
+       
+    }//GEN-LAST:event_BooleanRetrievalRadioButtonActionPerformed
+
+    private void RankedRetrievalRadioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_RankedRetrievalRadioButtonActionPerformed
+        // TODO add your handling code here:
+        ButtonGroup group = new ButtonGroup();
+        group.add(DefaultRadioButton);
+        group.add(OkapiBM25RadioButton);
+        group.add(Tf_IdfRadioButton);
+        group.add(WackyRadioButton);
+        
+        if(RankedRetrievalRadioButton.isSelected())
+        { 
+        VocabButton.setVisible(true); 
+        SearchButton.setVisible(true);
+      //VocabButton.setVisible(true);
+        StemButton.setVisible(true);
+        Result_field.setVisible(true);
+        end.setVisible(true);
+        querytext.setVisible(true);
+      //Document_list.setVisible(false);
+        QueryLabel.setVisible(true);
+        ResultLabel.setVisible(true);
+      //jlist.setVisible(false);
+      //Document_list.setVisible(true);
+        jScrollPane1.setVisible(true);
+        DefaultRadioButton.setVisible(true);
+        Tf_IdfRadioButton.setVisible(true);
+        OkapiBM25RadioButton.setVisible(true);
+        WackyRadioButton.setVisible(true);
+        jScrollPane1.setVisible(true);
+        }
+        
+    }//GEN-LAST:event_RankedRetrievalRadioButtonActionPerformed
+    
     private static Indexes indexCorpus(DocumentCorpus corpus) throws IOException {
         
         HashSet<String> vocabulary = new HashSet<>();
@@ -508,6 +691,7 @@ public class DirectorySearch extends javax.swing.JFrame {
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
          */
+        
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -530,26 +714,42 @@ public class DirectorySearch extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new DirectorySearch().setVisible(true);
+                
             }
         });
+        
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JRadioButton BooleanRetrievalRadioButton;
+    private javax.swing.JButton BuildIndexButton;
+    private javax.swing.JRadioButton DefaultRadioButton;
     private javax.swing.JTextField DirectoryInput;
     private javax.swing.JButton DirectorySelectionButton;
     private javax.swing.JList<String> Document_list;
-    private javax.swing.JButton IndexButton;
+    private javax.swing.JRadioButton OkapiBM25RadioButton;
+    private javax.swing.JButton QueryIndexButton;
+    private javax.swing.JLabel QueryLabel;
+    private javax.swing.JRadioButton RankedRetrievalRadioButton;
+    private javax.swing.JLabel ResultLabel;
     private javax.swing.JTextArea Result_field;
+    private javax.swing.JLabel RetrievalLabel;
+    private javax.swing.JButton SearchButton;
     private javax.swing.JButton StemButton;
+    private javax.swing.JRadioButton Tf_IdfRadioButton;
     private javax.swing.JButton VocabButton;
+    private javax.swing.JRadioButton WackyRadioButton;
     private javax.swing.JLabel document_no;
     private javax.swing.JButton end;
-    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTextField querytext;
     // End of variables declaration//GEN-END:variables
+
+    private static class JComboBox1<T> {
+
+      }
+
+    
 }
