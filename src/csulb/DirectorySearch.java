@@ -6,6 +6,7 @@
 package csulb;
 
 import RankedRetrieval.DefaultRanking;
+import RankedRetrieval.OkapiBM25Ranking;
 import cecs429.documents.DirectoryCorpus;
 import cecs429.documents.Document;
 import cecs429.documents.DocumentCorpus;
@@ -19,6 +20,8 @@ import cecs429.query.BooleanQueryParser;
 import cecs429.query.QueryComponent;
 import RankedRetrieval.RankedRetrievals;
 import RankedRetrieval.RankingStrategy;
+import RankedRetrieval.Tf_IdfRanking;
+import RankedRetrieval.WackyRanking;
 import cecs429.text.AdvancedTokenProcessor;
 import cecs429.text.EnglishTokenStream;
 import disk.DiskInvertedIndex;
@@ -64,23 +67,24 @@ public class DirectorySearch extends javax.swing.JFrame {
     private DocumentCorpus corpus;
     private List<Posting> result_docs = new ArrayList();
     private AdvancedTokenProcessor processor = new AdvancedTokenProcessor();
-    
+    private RankingStrategy ranking_strategy;
+
     /**
      * Creates new form DirectorySearch
      */
     public DirectorySearch() {
         initComponents();
-        VocabButton.setVisible(false); 
+        VocabButton.setVisible(false);
         SearchButton.setVisible(false);
-      //VocabButton.setVisible(true);
+        //VocabButton.setVisible(true);
         StemButton.setVisible(false);
         Result_field.setVisible(false);
         end.setVisible(false);
         querytext.setVisible(false);
-     //Document_list.setVisible(false);
+        //Document_list.setVisible(false);
         QueryLabel.setVisible(false);
         ResultLabel.setVisible(false);
-      //jlist.setVisible(false);
+        //jlist.setVisible(false);
         Document_list.setVisible(false);
         jScrollPane1.setVisible(false);
         jScrollPane2.setVisible(false);
@@ -93,7 +97,7 @@ public class DirectorySearch extends javax.swing.JFrame {
         OkapiBM25RadioButton.setVisible(false);
         WackyRadioButton.setVisible(false);
         RetrievalLabel.setVisible(false);
-        
+
         Document_list.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
@@ -132,7 +136,7 @@ public class DirectorySearch extends javax.swing.JFrame {
         SearchButton = new javax.swing.JButton();
         querytext = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
-        Document_list = new javax.swing.JList<String>();
+        Document_list = new javax.swing.JList<>();
         jScrollPane2 = new javax.swing.JScrollPane();
         Result_field = new javax.swing.JTextArea();
         end = new javax.swing.JButton();
@@ -203,10 +207,10 @@ public class DirectorySearch extends javax.swing.JFrame {
             }
         });
 
-        Document_list.setModel(new javax.swing.AbstractListModel() {
+        Document_list.setModel(new javax.swing.AbstractListModel<String>() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
-            public Object getElementAt(int i) { return strings[i]; }
+            public String getElementAt(int i) { return strings[i]; }
         });
         jScrollPane1.setViewportView(Document_list);
 
@@ -226,6 +230,11 @@ public class DirectorySearch extends javax.swing.JFrame {
         ResultLabel.setText("Result");
 
         QueryIndexButton.setText("Query Index");
+        QueryIndexButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                QueryIndexButtonActionPerformed(evt);
+            }
+        });
 
         BooleanRetrievalRadioButton.setText("Boolean Retrieval");
         BooleanRetrievalRadioButton.addActionListener(new java.awt.event.ActionListener() {
@@ -242,12 +251,32 @@ public class DirectorySearch extends javax.swing.JFrame {
         });
 
         DefaultRadioButton.setText("Default");
+        DefaultRadioButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                DefaultRadioButtonActionPerformed(evt);
+            }
+        });
 
         Tf_IdfRadioButton.setText("Tf - Idf");
+        Tf_IdfRadioButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                Tf_IdfRadioButtonActionPerformed(evt);
+            }
+        });
 
         OkapiBM25RadioButton.setText("Okapi BM25");
+        OkapiBM25RadioButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                OkapiBM25RadioButtonActionPerformed(evt);
+            }
+        });
 
         WackyRadioButton.setText("Wacky");
+        WackyRadioButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                WackyRadioButtonActionPerformed(evt);
+            }
+        });
 
         RetrievalLabel.setText("Select one of the Method");
 
@@ -382,8 +411,7 @@ public class DirectorySearch extends javax.swing.JFrame {
         DirectoryInput.setText(path);
         // String Directorypath = path;
         System.out.print("Outside Button: " + path);
-        
-        
+
 
     }//GEN-LAST:event_DirectorySelectionButtonActionPerformed
 
@@ -395,46 +423,46 @@ public class DirectorySearch extends javax.swing.JFrame {
             // System.out.print("Path inside button:  " +path);
 
             mPath = DirectoryInput.getText();
-            
+
             long startTime = System.currentTimeMillis();
             corpus = DirectoryCorpus.loadJsonDirectory(Paths.get(mPath).toAbsolutePath(), ".json");
             indexes = indexCorpus(corpus);
-            
+
             //writing INDEX on disk
             DiskIndexWriter disk_writer = new DiskIndexWriter();
-            List<Long> voc_positions = disk_writer.write_posting(indexes.index, mPath+"\\index\\");
-            List<Long> vocab_positions = disk_writer.write_vocab(indexes.index.getVocabulary(), mPath+"\\index\\");
-            disk_writer.write_vocab_table(vocab_positions,voc_positions, mPath+"\\index\\");
-            DiskInvertedIndex DII = new DiskInvertedIndex(mPath+"\\index\\");
+            List<Long> voc_positions = disk_writer.write_posting(indexes.index, mPath + "\\index\\");
+            List<Long> vocab_positions = disk_writer.write_vocab(indexes.index.getVocabulary(), mPath + "\\index\\");
+            disk_writer.write_vocab_table(vocab_positions, voc_positions, mPath + "\\index\\");
+            DiskInvertedIndex DII = new DiskInvertedIndex(mPath + "\\index\\");
             //writing Biword on disk
-            List<Long> voc_positions_biword = disk_writer.write_posting(indexes.biword_index, mPath+"\\index\\biword\\");
-            List<Long> vocab_positions_biword = disk_writer.write_vocab(indexes.biword_index.getVocabulary(), mPath+"\\index\\biword\\");
-            disk_writer.write_vocab_table(vocab_positions_biword,voc_positions_biword, mPath+"\\index\\biword\\");
-            DiskInvertedIndex DII_biword = new DiskInvertedIndex(mPath+"\\index\\biword\\");
+            List<Long> voc_positions_biword = disk_writer.write_posting(indexes.biword_index, mPath + "\\index\\biword\\");
+            List<Long> vocab_positions_biword = disk_writer.write_vocab(indexes.biword_index.getVocabulary(), mPath + "\\index\\biword\\");
+            disk_writer.write_vocab_table(vocab_positions_biword, voc_positions_biword, mPath + "\\index\\biword\\");
+            DiskInvertedIndex DII_biword = new DiskInvertedIndex(mPath + "\\index\\biword\\");
             //DiskInvertedIndex[] i = {DII, DII_biword};
-            indexes = new Indexes(DII, DII_biword);        
+            indexes = new Indexes(DII, DII_biword);
             long stopTime = System.currentTimeMillis();
             long elapsedTime = stopTime - startTime;
             document_no.setText("Total time elapsed for indexing : " + elapsedTime / 1000 + " secs");
 
             // AdvancedTokenProcessor processor = new AdvancedTokenProcessor();
             String query;
-          
-        BooleanRetrievalRadioButton.setVisible(true);
-        RankedRetrievalRadioButton.setVisible(true);
-        RetrievalLabel.setVisible(true);
-               
-        ButtonGroup group = new ButtonGroup();
-        group.add(RankedRetrievalRadioButton);
-        group.add(BooleanRetrievalRadioButton);
-        
+
+            BooleanRetrievalRadioButton.setVisible(true);
+            RankedRetrievalRadioButton.setVisible(true);
+            RetrievalLabel.setVisible(true);
+
+            ButtonGroup group = new ButtonGroup();
+            group.add(RankedRetrievalRadioButton);
+            group.add(BooleanRetrievalRadioButton);
+
         } catch (IOException ex) {
             Logger.getLogger(DirectorySearch.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_BuildIndexButtonActionPerformed
 
     private void VocabButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_VocabButtonActionPerformed
-        
+
         System.out.println("First 1000 words:: ");
         //  List<String> listKeys = new ArrayList<String>();
         listKeys = indexes.index.getVocabulary();
@@ -448,24 +476,23 @@ public class DirectorySearch extends javax.swing.JFrame {
             }
         }
         Result_field.setText(result);
-     //   Result_field.setVisible(false);
-      //  VocabButton.setVisible(false);
+        //   Result_field.setVisible(false);
+        //  VocabButton.setVisible(false);
     }//GEN-LAST:event_VocabButtonActionPerformed
 
     private void StemButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_StemButtonActionPerformed
         // TODO add your handling code here:
         // BooleanQueryParser queryparser = new BooleanQueryParser();
-      // StemButton.setVisible(false);
+        // StemButton.setVisible(false);
 
         String input = querytext.getText();
         AdvancedTokenProcessor processor = new AdvancedTokenProcessor();
-        
-        //String stemmingWord = query.substring(4).trim();
 
+        //String stemmingWord = query.substring(4).trim();
         String result = processor.stem(input);
         Result_field.setText(result);
-        
-      //  StemButton.setVisible(false);
+
+        //  StemButton.setVisible(false);
     }//GEN-LAST:event_StemButtonActionPerformed
 
     private void DirectoryInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DirectoryInputActionPerformed
@@ -474,64 +501,58 @@ public class DirectorySearch extends javax.swing.JFrame {
 
     private void SearchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SearchButtonActionPerformed
         // TODO add your handling code here:
-        
+        Document_list.setVisible(true);
+        jScrollPane1.setVisible(true);
         String query = querytext.getText();
-        BooleanQueryParser queryparser = new BooleanQueryParser();
-        QueryComponent query_component = queryparser.parseQuery(query);
-        int i = 0;
-        result_docs = query_component.getPostings(indexes,processor);
         DefaultListModel<String> listModel = new DefaultListModel<>();
-        ArrayList<String> documents = new ArrayList<>();
+        if (BooleanRetrievalRadioButton.isSelected()) {
+            BooleanQueryParser queryparser = new BooleanQueryParser();
+            QueryComponent query_component = queryparser.parseQuery(query);
+            int i = 0;
+            result_docs = query_component.getPostings(indexes, processor);
 
-        for (Posting p : result_docs) {
-            i++;
-            listModel.addElement(corpus.getDocument(p.getDocumentId()).getTitle());
-            System.out.println(i + ")" + corpus.getDocument(p.getDocumentId()).getTitle());
-        }
-        RankedRetrievals r = new RankedRetrievals(query,mPath, corpus.getCorpusSize());
-        DiskInvertedIndex DII = new DiskInvertedIndex(mPath+"\\index\\");
-        List<PostingAccumulator> Ranking_results = new ArrayList<>();
-        try {
-            RankingStrategy ranking_strategy = new DefaultRanking(DII);
-            Ranking_results = r.getPostings(indexes,processor, ranking_strategy);
-        } catch (IOException ex) {
-            Logger.getLogger(DirectorySearch.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        int j = 0;
-        for(PostingAccumulator p : Ranking_results)
-        {
-            j++;
-            Posting posting = p.getPosting();
-            System.out.println(j + ")" + corpus.getDocument(posting.getDocumentId()).getTitle()+" Accum value - "+ p.getAccumulator());
+            ArrayList<String> documents = new ArrayList<>();
+            for (Posting p : result_docs) {
+                i++;
+                listModel.addElement(corpus.getDocument(p.getDocumentId()).getTitle());
+                System.out.println(i + ")" + corpus.getDocument(p.getDocumentId()).getTitle());
+            }
+            if (i == 0) {
+                document_no.setText("No Match Found for word \"" + query + "\".");
+                //System.out.println("No Match Found for word \"" + query + "\".");
+            } else {
+                document_no.setText("Total number of Document word \"" + query + "\" occured is :: " + i);
+            }
+        } else if (RankedRetrievalRadioButton.isSelected()) {
+            String result = "";
+            RankedRetrievals r = new RankedRetrievals(query, mPath, corpus.getCorpusSize());
+            List<PostingAccumulator> Ranking_results = new ArrayList<>();
+            try {
+                Ranking_results = r.getPostings(indexes, processor, ranking_strategy);
+            } catch (IOException ex) {
+                Logger.getLogger(DirectorySearch.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            int j = 0;
+            for (PostingAccumulator p : Ranking_results) {
+                j++;
+                Posting posting = p.getPosting();
+                listModel.addElement(corpus.getDocument(posting.getDocumentId()).getTitle());
+                String s = corpus.getDocument(posting.getDocumentId()).getTitle() + " Accum value - " + p.getAccumulator();
+                result += s +"\n";
+                System.out.println(j + ")" + corpus.getDocument(posting.getDocumentId()).getTitle() + " Accum value - " + p.getAccumulator());
+            }
+            Result_field.setText(result);
+            if (j == 0) {
+                document_no.setText("No Match Found for word \"" + query + "\".");
+                //System.out.println("No Match Found for word \"" + query + "\".");
+            } else {
+                document_no.setText("Total number of Document word \"" + query + "\" occured is :: " + j);
+            }
         }
         Document_list.setModel(listModel);
         Document_list.setVisible(true);
         jScrollPane2.setVisible(true);
-        if (i == 0) {
-            document_no.setText("No Match Found for word \"" + query + "\".");
-            //System.out.println("No Match Found for word \"" + query + "\".");
-        } else {
-            document_no.setText("Total number of Document word \"" + query + "\" occured is :: " + i);
 
-            /* if (choice.toLowerCase().trim().equals("yes")) {
-                    System.out.print("Enter the Document Number which you want to print :: ");
-                    int Id = scanner.nextInt();
-                    scanner.nextLine();
-                    Reader r = corpus.getDocument(docs.get(Id-1).getDocumentId()).getContent();
-                    Scanner s = new Scanner(r);
-                    String content="";
-                    while(s.hasNextLine())
-                    {
-                        content += s.nextLine();
-                    }
-                    System.out.println(content);
-                }*/
-        }
-        
-      //   SearchButton.setVisible(false);
-       //    Result_field.setVisible(true);
-     //    Document_list.setVisible(true);
-        
     }//GEN-LAST:event_SearchButtonActionPerformed
 
     private void querytextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_querytextActionPerformed
@@ -545,33 +566,34 @@ public class DirectorySearch extends javax.swing.JFrame {
 
     private void BooleanRetrievalRadioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BooleanRetrievalRadioButtonActionPerformed
         // TODO add your handling code here:
-        if(BooleanRetrievalRadioButton.isSelected()){
-        BooleanRetrievalRadioButton.setSelected(true);
-        VocabButton.setVisible(true); 
-        SearchButton.setVisible(true);
-      //VocabButton.setVisible(true);
-        StemButton.setVisible(true);
-        Result_field.setVisible(true);
-        end.setVisible(true);
-        querytext.setVisible(true);
-     //Document_list.setVisible(false);
-        QueryLabel.setVisible(true);
-        ResultLabel.setVisible(true);
-      //jlist.setVisible(false);
-     //Document_list.setVisible(true);
-      //  jScrollPane1.setVisible(true);
-        jScrollPane2.setVisible(true);
-        
-     //   BooleanRetrievalRadioButton.setVisible(false);
-      //  RankedRetrievalRadioButton.setVisible(false);
-     //   Document_list.setVisible(true);
-        DefaultRadioButton.setVisible(false);
-        Tf_IdfRadioButton.setVisible(false);
-        OkapiBM25RadioButton.setVisible(false);
-        WackyRadioButton.setVisible(false);
+
+        if (BooleanRetrievalRadioButton.isSelected()) {
+            BooleanRetrievalRadioButton.setSelected(true);
+            VocabButton.setVisible(true);
+            SearchButton.setVisible(true);
+            //VocabButton.setVisible(true);
+            StemButton.setVisible(true);
+            Result_field.setVisible(true);
+            end.setVisible(true);
+            querytext.setVisible(true);
+            //Document_list.setVisible(false);
+            QueryLabel.setVisible(true);
+            ResultLabel.setVisible(true);
+            //jlist.setVisible(false);
+            //Document_list.setVisible(true);
+            //  jScrollPane1.setVisible(true);
+            jScrollPane2.setVisible(true);
+
+            //   BooleanRetrievalRadioButton.setVisible(false);
+            //  RankedRetrievalRadioButton.setVisible(false);
+            //   Document_list.setVisible(true);
+            DefaultRadioButton.setVisible(false);
+            Tf_IdfRadioButton.setVisible(false);
+            OkapiBM25RadioButton.setVisible(false);
+            WackyRadioButton.setVisible(false);
         }
-        
-       
+
+
     }//GEN-LAST:event_BooleanRetrievalRadioButtonActionPerformed
 
     private void RankedRetrievalRadioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_RankedRetrievalRadioButtonActionPerformed
@@ -581,34 +603,75 @@ public class DirectorySearch extends javax.swing.JFrame {
         group.add(OkapiBM25RadioButton);
         group.add(Tf_IdfRadioButton);
         group.add(WackyRadioButton);
-        
-        if(RankedRetrievalRadioButton.isSelected())
-        { 
-        VocabButton.setVisible(true); 
+
+        VocabButton.setVisible(true);
         SearchButton.setVisible(true);
-      //VocabButton.setVisible(true);
+        //VocabButton.setVisible(true);
         StemButton.setVisible(true);
         Result_field.setVisible(true);
         end.setVisible(true);
         querytext.setVisible(true);
-      //Document_list.setVisible(false);
+        //Document_list.setVisible(false);
         QueryLabel.setVisible(true);
         ResultLabel.setVisible(true);
-      //jlist.setVisible(false);
-      //Document_list.setVisible(true);
+        //jlist.setVisible(false);
+        //Document_list.setVisible(true);
         jScrollPane1.setVisible(true);
         DefaultRadioButton.setVisible(true);
         Tf_IdfRadioButton.setVisible(true);
         OkapiBM25RadioButton.setVisible(true);
         WackyRadioButton.setVisible(true);
         jScrollPane1.setVisible(true);
-        }
-        
+
     }//GEN-LAST:event_RankedRetrievalRadioButtonActionPerformed
-    
+
+    private void DefaultRadioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DefaultRadioButtonActionPerformed
+        // TODO add your handling code here:
+        DiskInvertedIndex DII = new DiskInvertedIndex(mPath + "\\index\\");
+        ranking_strategy = new DefaultRanking(DII);
+    }//GEN-LAST:event_DefaultRadioButtonActionPerformed
+
+    private void Tf_IdfRadioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Tf_IdfRadioButtonActionPerformed
+        // TODO add your handling code here:
+        DiskInvertedIndex DII = new DiskInvertedIndex(mPath + "\\index\\");
+        ranking_strategy = new Tf_IdfRanking(DII);
+    }//GEN-LAST:event_Tf_IdfRadioButtonActionPerformed
+
+    private void OkapiBM25RadioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OkapiBM25RadioButtonActionPerformed
+        // TODO add your handling code here:
+        DiskInvertedIndex DII = new DiskInvertedIndex(mPath + "\\index\\");
+        ranking_strategy = new OkapiBM25Ranking(DII);
+    }//GEN-LAST:event_OkapiBM25RadioButtonActionPerformed
+
+    private void WackyRadioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_WackyRadioButtonActionPerformed
+        // TODO add your handling code here:
+        DiskInvertedIndex DII = new DiskInvertedIndex(mPath + "\\index\\");
+        ranking_strategy = new WackyRanking(DII);
+    }//GEN-LAST:event_WackyRadioButtonActionPerformed
+
+    private void QueryIndexButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_QueryIndexButtonActionPerformed
+        // TODO add your handling code here:
+        mPath = DirectoryInput.getText();
+        corpus = DirectoryCorpus.loadJsonDirectory(Paths.get(mPath).toAbsolutePath(), ".json");
+        System.out.println(corpus.getCorpusSize());
+        DiskInvertedIndex DII = new DiskInvertedIndex(mPath + "\\index\\");
+        DiskInvertedIndex DII_biword = new DiskInvertedIndex(mPath + "\\index\\biword\\");
+        indexes = new Indexes(DII, DII_biword);
+        String query;
+
+        BooleanRetrievalRadioButton.setVisible(true);
+        RankedRetrievalRadioButton.setVisible(true);
+        RetrievalLabel.setVisible(true);
+
+        ButtonGroup group = new ButtonGroup();
+        group.add(RankedRetrievalRadioButton);
+        group.add(BooleanRetrievalRadioButton);
+
+    }//GEN-LAST:event_QueryIndexButtonActionPerformed
+
     private static Indexes indexCorpus(DocumentCorpus corpus) throws IOException {
-        
-        HashSet<String> vocabulary = new HashSet<>();
+
+        //HashSet<String> vocabulary = new HashSet<>();
         List<Double> doc_weights_file = new ArrayList<>();
         double doc_weight = 0;
         double doc_length = 0;
@@ -622,7 +685,7 @@ public class DirectorySearch extends javax.swing.JFrame {
         for (Document d : corpus.getDocuments()) {
             EnglishTokenStream ets = new EnglishTokenStream(d.getContent());
             File doc = new File(d.getFilePath().toString());
-            byte_size = (double)doc.length();
+            byte_size = (double) doc.length();
             int term_position = 0;
             String previous = "";
             HashMap<String, Integer> map = new HashMap<>();
@@ -631,52 +694,47 @@ public class DirectorySearch extends javax.swing.JFrame {
                 List<String> word = processor.processToken(s);
 
                 for (int i = 0; i < word.size(); i++) {
-                    
-                    if(map.containsKey(word.get(i)))
-                    {
+
+                    if (map.containsKey(word.get(i))) {
                         int count = map.get(word.get(i));
-                        map.put(word.get(i),count);
-                    }
-                    else
-                    {
+                        map.put(word.get(i), count);
+                    } else {
                         map.put(word.get(i), 1);
                     }
                     index.addTerm(word.get(i), d.getId(), term_position);
 
                     if (previous != "") {
-                        biword.addTerm(previous + " " + word.get(i), d.getId(), term_position-1);
+                        biword.addTerm(previous + " " + word.get(i), d.getId(), term_position - 1);
                     }
                     previous = word.get(i);
 
                 }
-                
 
             }
-            doc_length = (double)term_position;
+            doc_length = (double) term_position;
             double w_d_t = 0;
-            double ld =0;
+            double ld = 0;
             double total_tftd = 0;
-            for (HashMap.Entry<String,Integer> entry : map.entrySet())
-            {
+            for (HashMap.Entry<String, Integer> entry : map.entrySet()) {
                 int tftd = entry.getValue();
                 total_tftd += tftd;
                 w_d_t = 1 + Math.log(tftd);
-                ld += (w_d_t*w_d_t);
+                ld += (w_d_t * w_d_t);
             }
             ld = Math.sqrt(ld);
             doc_weight = ld;
-            total_length_tftd += total_tftd; 
-            avg_tftd = total_tftd/(double)map.size();
+            total_length_tftd += total_tftd;
+            avg_tftd = total_tftd / (double) map.size();
             doc_weights_file.add(doc_weight);
             doc_weights_file.add(doc_length);
             doc_weights_file.add(byte_size);
             doc_weights_file.add(avg_tftd);
             ets.close();
         }
-        doc_length_a = total_length_tftd/(double)corpus.getCorpusSize();
+        doc_length_a = total_length_tftd / (double) corpus.getCorpusSize();
         doc_weights_file.add(doc_length_a);
         DiskIndexWriter DiskWriter = new DiskIndexWriter();
-        DiskWriter.write_doc_weights(doc_weights_file, mPath+"\\index\\");
+        DiskWriter.write_doc_weights(doc_weights_file, mPath + "\\index\\");
         Indexes i = new Indexes(index, biword);
 
         return i;
@@ -691,7 +749,7 @@ public class DirectorySearch extends javax.swing.JFrame {
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
          */
-        
+
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -714,10 +772,10 @@ public class DirectorySearch extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new DirectorySearch().setVisible(true);
-                
+
             }
         });
-        
+
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -749,7 +807,6 @@ public class DirectorySearch extends javax.swing.JFrame {
 
     private static class JComboBox1<T> {
 
-      }
+    }
 
-    
 }

@@ -299,6 +299,9 @@
       <Properties>
         <Property name="text" type="java.lang.String" value="Query Index"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="QueryIndexButtonActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JRadioButton" name="BooleanRetrievalRadioButton">
       <Properties>
@@ -320,21 +323,33 @@
       <Properties>
         <Property name="text" type="java.lang.String" value="Default"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="DefaultRadioButtonActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JRadioButton" name="Tf_IdfRadioButton">
       <Properties>
         <Property name="text" type="java.lang.String" value="Tf - Idf"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="Tf_IdfRadioButtonActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JRadioButton" name="OkapiBM25RadioButton">
       <Properties>
         <Property name="text" type="java.lang.String" value="Okapi BM25"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="OkapiBM25RadioButtonActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JRadioButton" name="WackyRadioButton">
       <Properties>
         <Property name="text" type="java.lang.String" value="Wacky"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="WackyRadioButtonActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JLabel" name="RetrievalLabel">
       <Properties>
