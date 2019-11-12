@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cecs429.text;
+package cecs429.query;
 
 import cecs429.documents.DirectoryCorpus;
 import cecs429.documents.Document;
@@ -12,8 +12,8 @@ import cecs429.index.Index;
 import cecs429.index.Indexes;
 import cecs429.index.InvertedIndex;
 import cecs429.index.Posting;
-import cecs429.query.BooleanQueryParser;
-import cecs429.query.QueryComponent;
+import cecs429.text.AdvancedTokenProcessor;
+import cecs429.text.EnglishTokenStream;
 import disk.DiskIndexWriter;
 import disk.DiskInvertedIndex;
 import java.io.File;
@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -34,9 +33,9 @@ import static org.junit.Assert.*;
  *
  * @author Dipesh
  */
-public class AdvancedTokenProcessorTest {
+public class TermLiteralTest {
 
-    public AdvancedTokenProcessorTest() {
+    public TermLiteralTest() {
     }
 
     @BeforeClass
@@ -56,53 +55,35 @@ public class AdvancedTokenProcessorTest {
     }
 
     /**
-     * Test of processToken method, of class AdvancedTokenProcessor.
+     * Test of getTerm method, of class TermLiteral.
      */
     @Test
-    public void testProcessToken() throws IOException {
-        System.out.println("Advance Token Processor Case I Complete");
-        String query = "(256.256.256.256)";
+    public void testGetPostings() throws IOException {
+        System.out.println("Query Test Case I Complete");
+        String query = "single match";
+        String expResult = "Document4";
+        String results = mMethod(query);
+        assertEquals(expResult.trim(), results.trim());
+    }
+
+    @Test
+    public void testGetPostingsTwo() throws IOException {
+        System.out.println("Query Test Case II Complete");
+        String query = "\"text\" document";
+        String expResult = "Document3";
+        String results = mMethod(query);
+        assertEquals(expResult.trim(), results.trim());
+    }
+
+    @Test
+    public void testGetPostingsThree() throws IOException {
+        System.out.println("Query Test Case III Complete");
+        String query = "location 256.256.256.256";
         String expResult = "Document5";
         String results = mMethod(query);
         assertEquals(expResult.trim(), results.trim());
     }
 
-    @Test
-    public void testProcessTokenTwo() throws IOException {
-        System.out.println("Advance Token Processor Case II Complete");
-        String query = "!!!!!!Hello........";
-        String expResult = "Document1";
-        String results = mMethod(query);
-        assertEquals(expResult.trim(), results.trim());
-    }
-
-    @Test
-    public void testProcessTokenThree() throws IOException {
-        System.out.println("Advance Token Processor Case III Complete");
-        DocumentCorpus corpus = DirectoryCorpus.loadJsonDirectory(Paths.get("C:\\Users\\dipes\\Desktop\\Unit Test\\JSON").toAbsolutePath(), ".json");
-        String query = "first-Document!!";
-        String expResult = "Document1";
-        String results = mMethod(query);
-        assertEquals(expResult.trim(), results.trim());
-    }
-
-    @Test
-    public void testProcessTokenFour() throws IOException {
-        System.out.println("Advance Token Processor Case IV Complete");
-        String query = "\"this\"";
-        String expResult = "Document1Document3Document5";
-        String results = mMethod(query);
-        assertEquals(expResult.trim(), results.trim());
-    }
-
-    @Test
-    public void testProcessTokenFive() throws IOException {
-        System.out.println("Advance Token Processor Case IV Complete");
-        String query = "It\'s";    //And Query with Phrase Query..
-        String expResult = "Document1";
-        String results = mMethod(query);
-        assertEquals(expResult.trim(), results.trim());
-    }
     private static String mPath = "C:\\Users\\dipes\\Documents\\NetBeansProjects\\Seach Engine Technology\\Milestone2\\test";
 
     private static String mMethod(String query) throws IOException {
