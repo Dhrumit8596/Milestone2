@@ -53,13 +53,14 @@ public class RankedRetrievals {
             {
                 double tftd = p.gettftd();
                 double wdt = rank_strategy.getWDT(tftd, p.getDocumentId());
+                
                 double increment = wdt * wqt;
                 if(map.containsKey(p.getDocumentId()))
                 {
                     PostingAccumulator postingaccumulator = map.get(p.getDocumentId());
                     double Ad = postingaccumulator.getAccumulator() + increment;
-                    //postingaccumulator.setAccumulator(Ad);
-                    map.put(p.getDocumentId(), new PostingAccumulator(p,Ad));
+                    postingaccumulator.setAccumulator(Ad);
+                    map.put(p.getDocumentId(), postingaccumulator);
                 }
                 else
                 {
@@ -74,6 +75,7 @@ public class RankedRetrievals {
         for(HashMap.Entry<Integer, PostingAccumulator> entry: map.entrySet())
         {
             double LD = rank_strategy.getLD(entry.getKey());
+            System.out.println("LD"+LD);
             PostingAccumulator p = entry.getValue();
             Double Ad;
             if(p.getAccumulator() != 0)

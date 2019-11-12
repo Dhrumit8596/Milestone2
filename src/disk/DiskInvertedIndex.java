@@ -91,7 +91,6 @@ public class DiskInvertedIndex implements Index {
             RandomAccessFile tableFile = new RandomAccessFile(
                     new File(indexName, "vocabTable.bin"),
                     "r");
-
            int tableIndex = 0;
             vocabTable = new long[((int) tableFile.length() / 16) * 2];
             byte[] byteBuffer = new byte[8];
@@ -141,7 +140,6 @@ public class DiskInvertedIndex implements Index {
                 doc_id = prev + ByteBuffer.wrap(byteBuffer).getInt();
                 prev = ByteBuffer.wrap(byteBuffer).getInt();
                 mPostings.read(byteBuffer, 0, byteBuffer.length);
-                //System.out.println(ByteBuffer.wrap(byteBuffer).getInt());
                 int tftd = ByteBuffer.wrap(byteBuffer).getInt();
                 int position = 0;
                 List<Integer> position_list = new ArrayList();
@@ -176,8 +174,7 @@ public class DiskInvertedIndex implements Index {
 
     public double getdocLength(int docID) throws FileNotFoundException, IOException {
         mDocWeights = new RandomAccessFile(new File(mPath, "docWeights.bin"), "r");
-        long weight_position = (docID + 1) * 8 * 4;
-//        long weight_position = (docID) * (8 * 4) + 16;
+        long weight_position = (docID) * 8 * 4 + 8;
 
         mDocWeights.seek(weight_position);
         byte[] byteBuffer = new byte[8];
@@ -190,8 +187,7 @@ public class DiskInvertedIndex implements Index {
 
     public double getbyteSize(int docID) throws FileNotFoundException, IOException {
         mDocWeights = new RandomAccessFile(new File(mPath, "docWeights.bin"), "r");
-        long weight_position = (docID + 2) * 8 * 4;
-//        long weight_position = (docID) * (8 * 4) + 24;
+        long weight_position = (docID) * 8 * 4 + 16;
         mDocWeights.seek(weight_position);
         byte[] byteBuffer = new byte[8];
         mDocWeights.read(byteBuffer, 0, byteBuffer.length);
@@ -203,8 +199,7 @@ public class DiskInvertedIndex implements Index {
 
     public double getavgTftd(int docID) throws FileNotFoundException, IOException {
         mDocWeights = new RandomAccessFile(new File(mPath, "docWeights.bin"), "r");
-        long weight_position = (docID + 3) * 8 * 4;
-//        long weight_position = (docID) * (8 * 4) + 8;
+        long weight_position = (docID) * 8 * 4 + 24;
         mDocWeights.seek(weight_position);
         byte[] byteBuffer = new byte[8];
         mDocWeights.read(byteBuffer, 0, byteBuffer.length);

@@ -35,6 +35,7 @@ public class OkapiBM25Ranking implements RankingStrategy{
      double doclength = 0,doclengthA = 0;
         try {
          doclength = mIndex.getdocLength(docID);
+         System.out.println("doc len"+doclength);
          doclengthA = mIndex.getdocLengthA();
      } catch (IOException ex) {
          Logger.getLogger(OkapiBM25Ranking.class.getName()).log(Level.SEVERE, null, ex);

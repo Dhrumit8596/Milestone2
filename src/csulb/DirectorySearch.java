@@ -705,7 +705,7 @@ public class DirectorySearch extends javax.swing.JFrame {
             HashMap<String, Integer> map = new HashMap<>();
             for (String s : ets.getTokens()) {
                 term_position++;
-                term_count++;
+               // term_count++;
                 List<String> word = processor.processToken(s);
 
                 for (int i = 0; i < word.size(); i++) {
@@ -713,7 +713,7 @@ public class DirectorySearch extends javax.swing.JFrame {
                     if (map.containsKey(word.get(i))) {
                         term_count++;
                         int count = map.get(word.get(i));
-                        map.put(word.get(i), count);
+                        map.put(word.get(i), count+1);
                     } else {
                         term_count++;
                         map.put(word.get(i), 1);
@@ -729,8 +729,6 @@ public class DirectorySearch extends javax.swing.JFrame {
 
             }
             doc_length = (double) term_count;
-           // System.out.println(doc_length);
-            
             double w_d_t = 0;
             double ld = 0;
             double total_tftd = 0;
@@ -738,15 +736,14 @@ public class DirectorySearch extends javax.swing.JFrame {
                 int tftd = entry.getValue();
                 total_tftd += tftd;
                 w_d_t = 1 + Math.log(tftd);
-                ld += (w_d_t * w_d_t);
+                ld = ld + Math.pow(w_d_t,2);
             }
-            ld = Math.sqrt(ld);
+            ld = Math.pow(ld,0.5);
             doc_weight = ld;
-            total_length_tftd += total_tftd;
+            total_length_tftd += term_count;
             avg_tftd = total_tftd / (double) map.size();
             doc_weights_file.add(doc_weight);
             doc_weights_file.add(doc_length);
-         //   System.out.println(doc_weight);
             doc_weights_file.add(byte_size);
             doc_weights_file.add(avg_tftd);
             ets.close();
