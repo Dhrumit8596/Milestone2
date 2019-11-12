@@ -40,7 +40,7 @@ public class OkapiBM25Ranking implements RankingStrategy{
          Logger.getLogger(OkapiBM25Ranking.class.getName()).log(Level.SEVERE, null, ex);
      }
       double numerator = 2.2 * tftd;
-      double denominator = 1.2*(0.25 + (0.75)*(doclength/doclengthA)) + tftd;
+      double denominator = (1.2*(0.25 + (0.75)*(doclength/doclengthA))) + tftd;
       double wdt = numerator/denominator;
       return wdt;
     }

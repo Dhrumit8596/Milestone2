@@ -5,14 +5,21 @@
  */
 package cecs429.query;
 
+import RankedRetrieval.DefaultRanking;
+import RankedRetrieval.OkapiBM25Ranking;
+import RankedRetrieval.RankedRetrievals;
+import RankedRetrieval.Tf_IdfRanking;
+import RankedRetrieval.WackyRanking;
 import cecs429.documents.DirectoryCorpus;
 import cecs429.documents.Document;
 import cecs429.documents.DocumentCorpus;
 import cecs429.index.Indexes;
 import cecs429.index.InvertedIndex;
 import cecs429.index.Posting;
+import cecs429.index.PostingAccumulator;
 import cecs429.text.AdvancedTokenProcessor;
 import cecs429.text.EnglishTokenStream;
+import csulb.DirectorySearch;
 import disk.DiskIndexWriter;
 import disk.DiskInvertedIndex;
 import java.io.File;
@@ -21,6 +28,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -32,9 +41,11 @@ import static org.junit.Assert.*;
  *
  * @author Dipesh
  */
-public class PhraseLiteralTest {
+public class RankedRetrievalsTestOkapi {
 
-    public PhraseLiteralTest() {
+    private static String mPath = "C:\\Users\\dipes\\Documents\\NetBeansProjects\\Seach Engine Technology\\Milestone2\\test";
+
+    public RankedRetrievalsTestOkapi() {
     }
 
     @BeforeClass
@@ -54,44 +65,71 @@ public class PhraseLiteralTest {
     }
 
     /**
-     * Test of getPostings method, of class PhraseLiteral.
+     * Test of getPostings method, of class RankedRetrievals.
      */
     @Test
     public void testGetPostings() throws IOException {
-        System.out.println("Query Test Case I Complete");
-        String query = "\"single match\" -document";  // PhraseLiteral With a not query
-        String expResult = "Document4";
-        String results = mMethod(query);
-        assertEquals(expResult.trim(), results.trim());
-    }
+        System.out.println("Test Case I Complete");
+        String query = "this";    
+        double[] expAccum = new double[10];
+        expAccum[0] = 0.06388384754990926;
+        expAccum[1] = 0.05;
+        expAccum[3] = 0.04309222041156404;
+        String[] expDocs = new String[10];
+        expDocs[0] = "Document3";
+        expDocs[1] = "Document5";
+        expDocs[3] = "Document1";
+        String docs = "";
 
+        int j = 0;
+        double accumulator = 0;
+        DirectoryCorpus corpus = DirectoryCorpus.loadJsonDirectory(Paths.get(mPath).toAbsolutePath(), ".json");
+        int corp_size = corpus.getCorpusSize();
+        List<PostingAccumulator> results = mMethod(query);
+        for (PostingAccumulator p : results) {
+            j++;
+            Posting posting = p.getPosting();
+            accumulator = p.getAccumulator();
+//            System.out.println("Accum value - " + accumulator);
+            docs = corpus.getDocument(posting.getDocumentId()).getTitle();
+                System.out.println(docs + " :: Accum value - " + accumulator);
+            if (docs.equals(expDocs[j])) {
+                    assertEquals(accumulator+"", expAccum[j]+"");
+                
+            }
+        }
+    }
     @Test
     public void testGetPostingsTwo() throws IOException {
-        System.out.println("Query Test Case II Complete");
-        String query = "JSON + \"text document\""; //Or Query with a phrase query
-        String expResult = "Document2Document3";
-        String results = mMethod(query);
-        assertEquals(expResult.trim(), results.trim());
+        System.out.println("Test Case II Complete");
+        String query = "Hello";
+        double expAccum = 0.47341642890138996;
+        String expDocs = "";
+        expDocs = "Document1";
+        String docs = "";
+
+        int j = 0;
+        double accumulator = 0;
+        DirectoryCorpus corpus = DirectoryCorpus.loadJsonDirectory(Paths.get(mPath).toAbsolutePath(), ".json");
+        int corp_size = corpus.getCorpusSize();
+        List<PostingAccumulator> results = mMethod(query);
+        for (PostingAccumulator p : results) {
+            j++;
+            Posting posting = p.getPosting();
+            accumulator = p.getAccumulator();
+            docs = corpus.getDocument(posting.getDocumentId()).getTitle();
+            System.out.println(docs + " :: Accum value - " + accumulator);
+            if (docs.equals(expDocs)) {
+                assertEquals(accumulator + "", expAccum + "");
+            }
+        }
     }
 
-    @Test
-    public void testGetPostingsThree() throws IOException {
-        System.out.println("Query Test Case III Complete");
-        String query = "this + \"location 256.256.256.256\"";    //And Query with Phrase Query.
-        String expResult = "Document1Document3Document5";
-        String results = mMethod(query);
-        assertEquals(expResult.trim(), results.trim());
-    }
-
-    private static String mPath = "C:\\Users\\dipes\\Documents\\NetBeansProjects\\Seach Engine Technology\\Milestone2\\test";
-
-    private static String mMethod(String query) throws IOException {
-
+    private static List<PostingAccumulator> mMethod(String query) throws IOException {
         DirectoryCorpus corpus = DirectoryCorpus.loadJsonDirectory(Paths.get(mPath).toAbsolutePath(), ".json");
         corpus = DirectoryCorpus.loadJsonDirectory(Paths.get(mPath).toAbsolutePath(), ".json");
         Indexes indexes = indexCorpus(corpus);
         AdvancedTokenProcessor processor = new AdvancedTokenProcessor();
-
         //writing INDEX on disk
         DiskIndexWriter disk_writer = new DiskIndexWriter();
         List<Long> voc_positions = disk_writer.write_posting(indexes.index, mPath + "\\index\\");
@@ -105,16 +143,12 @@ public class PhraseLiteralTest {
         DiskInvertedIndex DII_biword = new DiskInvertedIndex(mPath + "\\index\\biword\\");
         //DiskInvertedIndex[] i = {DII, DII_biword};
         indexes = new Indexes(DII, DII_biword);
-
         DiskInvertedIndex[] i = {DII, DII_biword};
-        String results = "";
-        BooleanQueryParser queryparser = new BooleanQueryParser();
-        QueryComponent query_component = queryparser.parseQuery(query);
-        List<Posting> result_docs = query_component.getPostings(indexes, processor);
-        for (Posting p : result_docs) {
-            results = results + corpus.getDocument(p.getDocumentId()).getTitle();
-        }
-        return results;
+        RankedRetrievals r = new RankedRetrievals(query, mPath, corpus.getCorpusSize());
+        List<PostingAccumulator> Ranking_results = new ArrayList<>();
+        OkapiBM25Ranking ranking_strategy = new OkapiBM25Ranking(DII);
+        Ranking_results = r.getPostings(indexes, processor, ranking_strategy);
+        return Ranking_results;
     }
 
     private static Indexes indexCorpus(DocumentCorpus corpus) throws IOException {

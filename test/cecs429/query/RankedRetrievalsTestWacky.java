@@ -7,6 +7,8 @@ package cecs429.query;
 
 import RankedRetrieval.DefaultRanking;
 import RankedRetrieval.RankedRetrievals;
+import RankedRetrieval.Tf_IdfRanking;
+import RankedRetrieval.WackyRanking;
 import cecs429.documents.DirectoryCorpus;
 import cecs429.documents.Document;
 import cecs429.documents.DocumentCorpus;
@@ -38,11 +40,11 @@ import static org.junit.Assert.*;
  *
  * @author Dipesh
  */
-public class RankedRetrievalsTest {
+public class RankedRetrievalsTestWacky {
 
     private static String mPath = "C:\\Users\\dipes\\Documents\\NetBeansProjects\\Seach Engine Technology\\Milestone2\\test";
 
-    public RankedRetrievalsTest() {
+    public RankedRetrievalsTestWacky() {
     }
 
     @BeforeClass
@@ -66,13 +68,12 @@ public class RankedRetrievalsTest {
      */
     @Test
     public void testGetPostings() throws IOException {
-        System.out.println("And Query Test Case I Complete");
-        String query = "this";    //And Query with Phrase Query.
-        String expResult = "Document3Document5Document1";
+        System.out.println("Test Case I Complete");
+        String query = "this";    
         double[] expAccum = new double[10];
-        expAccum[0] = 0.49041462650586315;
-        expAccum[1] = 0.49041462650586315;
-        expAccum[3] = 0.3101654435238621;
+        expAccum[0] = 0;
+        expAccum[1] = 0;
+        expAccum[3] = 0;
         String[] expDocs = new String[10];
         expDocs[0] = "Document3";
         expDocs[1] = "Document5";
@@ -90,10 +91,36 @@ public class RankedRetrievalsTest {
             accumulator = p.getAccumulator();
 //            System.out.println("Accum value - " + accumulator);
             docs = corpus.getDocument(posting.getDocumentId()).getTitle();
-                System.out.println(docs + " :: Accum value - " + accumulator);
+//            System.out.println(docs + " :: Accum value - " + accumulator);
             if (docs.equals(expDocs[j])) {
-                    assertEquals(accumulator+"", expAccum[j]+"");
-                
+                assertEquals(accumulator + "", expAccum[j] + "");
+
+            }
+        }
+    }
+
+    @Test
+    public void testGetPostingsTwo() throws IOException {
+        System.out.println("Test Case II Complete");
+        String query = "Hello";
+        double expAccum = 0.20889269124451026;
+        String expDocs = "";
+        expDocs = "Document1";
+        String docs = "";
+
+        int j = 0;
+        double accumulator = 0;
+        DirectoryCorpus corpus = DirectoryCorpus.loadJsonDirectory(Paths.get(mPath).toAbsolutePath(), ".json");
+        int corp_size = corpus.getCorpusSize();
+        List<PostingAccumulator> results = mMethod(query);
+        for (PostingAccumulator p : results) {
+            j++;
+            Posting posting = p.getPosting();
+            accumulator = p.getAccumulator();
+            docs = corpus.getDocument(posting.getDocumentId()).getTitle();
+            //System.out.println(docs + " :: Accum value - " + accumulator);
+            if (docs.equals(expDocs)) {
+                assertEquals(accumulator + "", expAccum + "");
             }
         }
     }
@@ -119,7 +146,7 @@ public class RankedRetrievalsTest {
         DiskInvertedIndex[] i = {DII, DII_biword};
         RankedRetrievals r = new RankedRetrievals(query, mPath, corpus.getCorpusSize());
         List<PostingAccumulator> Ranking_results = new ArrayList<>();
-        DefaultRanking ranking_strategy = new DefaultRanking(DII);
+        WackyRanking ranking_strategy = new WackyRanking(DII);
         Ranking_results = r.getPostings(indexes, processor, ranking_strategy);
         return Ranking_results;
     }
