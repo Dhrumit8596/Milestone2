@@ -164,7 +164,7 @@ public class DiskInvertedIndex implements Index {
 
     public double getdocweights_LD(int docID) throws IOException {
         mDocWeights = new RandomAccessFile(new File(mPath, "docWeights.bin"), "r");
-        long weight_position = docID * 8 * 4;
+        long weight_position = docID * (8 * 4);
         mDocWeights.seek(weight_position);
         byte[] byteBuffer = new byte[8];
         mDocWeights.read(byteBuffer, 0, byteBuffer.length);
@@ -177,6 +177,8 @@ public class DiskInvertedIndex implements Index {
     public double getdocLength(int docID) throws FileNotFoundException, IOException {
         mDocWeights = new RandomAccessFile(new File(mPath, "docWeights.bin"), "r");
         long weight_position = (docID + 1) * 8 * 4;
+//        long weight_position = (docID) * (8 * 4) + 16;
+
         mDocWeights.seek(weight_position);
         byte[] byteBuffer = new byte[8];
         mDocWeights.read(byteBuffer, 0, byteBuffer.length);
@@ -189,6 +191,7 @@ public class DiskInvertedIndex implements Index {
     public double getbyteSize(int docID) throws FileNotFoundException, IOException {
         mDocWeights = new RandomAccessFile(new File(mPath, "docWeights.bin"), "r");
         long weight_position = (docID + 2) * 8 * 4;
+//        long weight_position = (docID) * (8 * 4) + 24;
         mDocWeights.seek(weight_position);
         byte[] byteBuffer = new byte[8];
         mDocWeights.read(byteBuffer, 0, byteBuffer.length);
@@ -201,6 +204,7 @@ public class DiskInvertedIndex implements Index {
     public double getavgTftd(int docID) throws FileNotFoundException, IOException {
         mDocWeights = new RandomAccessFile(new File(mPath, "docWeights.bin"), "r");
         long weight_position = (docID + 3) * 8 * 4;
+//        long weight_position = (docID) * (8 * 4) + 8;
         mDocWeights.seek(weight_position);
         byte[] byteBuffer = new byte[8];
         mDocWeights.read(byteBuffer, 0, byteBuffer.length);

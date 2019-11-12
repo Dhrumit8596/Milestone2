@@ -58,8 +58,8 @@ public class RankedRetrievals {
                 {
                     PostingAccumulator postingaccumulator = map.get(p.getDocumentId());
                     double Ad = postingaccumulator.getAccumulator() + increment;
-                    postingaccumulator.setAccumulator(increment);
-                    map.put(p.getDocumentId(), postingaccumulator);
+                    //postingaccumulator.setAccumulator(Ad);
+                    map.put(p.getDocumentId(), new PostingAccumulator(p,Ad));
                 }
                 else
                 {
@@ -68,12 +68,12 @@ public class RankedRetrievals {
             }
             
         }
-        DiskInvertedIndex DII = new DiskInvertedIndex(mpath+"\\index\\");
+        //DiskInvertedIndex DII = new DiskInvertedIndex(mpath+"\\index\\");
         PriorityQueue<PostingAccumulator> PQ = new PriorityQueue<>();
         
         for(HashMap.Entry<Integer, PostingAccumulator> entry: map.entrySet())
         {
-            Double LD = DII.getdocweights_LD(entry.getKey());
+            double LD = rank_strategy.getLD(entry.getKey());
             PostingAccumulator p = entry.getValue();
             Double Ad;
             if(p.getAccumulator() != 0)

@@ -701,18 +701,22 @@ public class DirectorySearch extends javax.swing.JFrame {
             File doc = new File(d.getFilePath().toString());
             byte_size = (double) doc.length();
             int term_position = 0;
+            int term_count = 0;
             String previous = "";
             HashMap<String, Integer> map = new HashMap<>();
             for (String s : ets.getTokens()) {
                 term_position++;
+                term_count++;
                 List<String> word = processor.processToken(s);
 
                 for (int i = 0; i < word.size(); i++) {
 
                     if (map.containsKey(word.get(i))) {
+                        term_count++;
                         int count = map.get(word.get(i));
                         map.put(word.get(i), count);
                     } else {
+                        term_count++;
                         map.put(word.get(i), 1);
                     }
                     index.addTerm(word.get(i), d.getId(), term_position);
@@ -725,7 +729,9 @@ public class DirectorySearch extends javax.swing.JFrame {
                 }
 
             }
-            doc_length = (double) term_position;
+            doc_length = (double) term_count;
+           // System.out.println(doc_length);
+            
             double w_d_t = 0;
             double ld = 0;
             double total_tftd = 0;
@@ -741,6 +747,7 @@ public class DirectorySearch extends javax.swing.JFrame {
             avg_tftd = total_tftd / (double) map.size();
             doc_weights_file.add(doc_weight);
             doc_weights_file.add(doc_length);
+         //   System.out.println(doc_weight);
             doc_weights_file.add(byte_size);
             doc_weights_file.add(avg_tftd);
             ets.close();
