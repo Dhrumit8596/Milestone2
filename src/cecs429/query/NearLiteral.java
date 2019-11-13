@@ -43,11 +43,11 @@ public class NearLiteral implements QueryComponent {
      */
     public NearLiteral(String terms) {
         List<String> terms_list = Arrays.asList(terms.split(" "));
-        AdvancedTokenProcessor processor = new AdvancedTokenProcessor();
-        List<String> s = new ArrayList(processor.processToken(terms_list.get(0)));
-        mTerms.add(s.get(s.size() - 1));
-        List<String> s1 = new ArrayList(processor.processToken(terms_list.get(2)));
-        mTerms.add(s1.get(s1.size() - 1));
+//        AdvancedTokenProcessor processor = new AdvancedTokenProcessor();
+//        List<String> s = new ArrayList(processor.processToken(terms_list.get(0)));
+        mTerms.add(terms_list.get(0));
+//        List<String> s1 = new ArrayList(processor.processToken(terms_list.get(2)));
+        mTerms.add(terms_list.get(2));
 
         near_k = Integer.parseInt(terms_list.get(1).charAt(5) + "");
 
@@ -56,16 +56,16 @@ public class NearLiteral implements QueryComponent {
     @Override
     public List<Posting> getPostings(Indexes indexes, TokenProcessor processor) {
         List<String> s = new ArrayList(processor.processToken(mTerms.get(0)));
-        mTerms.add(0, s.get(s.size() - 1));
+        
         List<String> s1 = new ArrayList(processor.processToken(mTerms.get(1)));
-        mTerms.add(1,s1.get(s1.size() - 1));
-        String firstterm = mTerms.get(0);
+        
+        String firstterm = s.get(s.size() - 1);
         List<Posting> result = indexes.index.getPostingsWithPositions(firstterm);
         //    for (String term : mTerms) {
         //   if (term.equals(firstterm)) {
         //    continue;
         //  }
-        String second_term = mTerms.get(1);
+        String second_term = s1.get(s1.size() - 1);
         List<Posting> posting = indexes.index.getPostingsWithPositions(second_term);
         List<Posting> temp = new ArrayList<>(result);
         result.clear();

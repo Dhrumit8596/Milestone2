@@ -25,6 +25,7 @@ import disk.DiskInvertedIndex;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -70,15 +71,15 @@ public class RankedRetrievalsTestOkapi {
     @Test
     public void testGetPostings() throws IOException {
         System.out.println("Test Case I Complete");
-        String query = "this";    
+        String query = "this";
         double[] expAccum = new double[10];
-        expAccum[0] = 0.06388384754990926;
-        expAccum[1] = 0.05;
-        expAccum[3] = 0.04309222041156404;
+        expAccum[0] = 0.118;
+        expAccum[1] = 0.118;
+        expAccum[2] = 0.086;
         String[] expDocs = new String[10];
         expDocs[0] = "Document3";
         expDocs[1] = "Document5";
-        expDocs[3] = "Document1";
+        expDocs[2] = "Document1";
         String docs = "";
 
         int j = 0;
@@ -90,20 +91,20 @@ public class RankedRetrievalsTestOkapi {
             j++;
             Posting posting = p.getPosting();
             accumulator = p.getAccumulator();
-//            System.out.println("Accum value - " + accumulator);
             docs = corpus.getDocument(posting.getDocumentId()).getTitle();
-                System.out.println(docs + " :: Accum value - " + accumulator);
+            System.out.println(docs + " :: Accum value - " + accumulator);
             if (docs.equals(expDocs[j])) {
-                    assertEquals(accumulator+"", expAccum[j]+"");
-                
+                assertEquals((new DecimalFormat("#0.000").format(accumulator)) + "", expAccum + "");
+
             }
         }
     }
+
     @Test
     public void testGetPostingsTwo() throws IOException {
         System.out.println("Test Case II Complete");
         String query = "Hello";
-        double expAccum = 0.47341642890138996;
+        double expAccum = 0.942;
         String expDocs = "";
         expDocs = "Document1";
         String docs = "";
@@ -118,9 +119,8 @@ public class RankedRetrievalsTestOkapi {
             Posting posting = p.getPosting();
             accumulator = p.getAccumulator();
             docs = corpus.getDocument(posting.getDocumentId()).getTitle();
-            System.out.println(docs + " :: Accum value - " + accumulator);
             if (docs.equals(expDocs)) {
-                assertEquals(accumulator + "", expAccum + "");
+                assertEquals((new DecimalFormat("#0.000").format(accumulator)) + "", expAccum + "");
             }
         }
     }

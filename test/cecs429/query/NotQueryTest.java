@@ -68,7 +68,7 @@ public class NotQueryTest {
     @Test
     public void testGetPostingsTwo() throws IOException {
         System.out.println("Query Test Case II Complete");
-        String query = "single match - document";  // And Query and Not Query...
+        String query = "\"single match\" -document";  // Phrase Query and Not Query...
         String expResult = "Document4";
         String results = mMethod(query);
         assertEquals(expResult.trim(), results.trim());
@@ -77,7 +77,7 @@ public class NotQueryTest {
     @Test
     public void testGetPostingsThree() throws IOException {
         System.out.println("Query Test Case III Complete");
-        String query = "location -document";
+        String query = "location 256.256.256.256 -document"; //And query with not query
         String expResult = "Document5";
         String results = mMethod(query);
         assertEquals(expResult.trim(), results.trim());

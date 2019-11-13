@@ -59,8 +59,8 @@ public class NearLiteralTest {
     @Test
     public void testGetPostings() throws IOException {
         System.out.println("Query Test Case I Complete");
-        String query = "[This Near/3 Document]";
-        String expResult = "Document1Document3";
+        String query = "[not Near/3 single match]"; //Phrase Query with NearKQuery
+        String expResult = "Document4";
         String results = mMethod(query);
         assertEquals(expResult.trim(), results.trim());
     }
@@ -82,6 +82,7 @@ public class NearLiteralTest {
         String results = mMethod(query);
         assertEquals(expResult.trim(), results.trim());
     }
+
 
     private static String mPath = "C:\\Users\\dipes\\Documents\\NetBeansProjects\\Seach Engine Technology\\Milestone2\\test";
 

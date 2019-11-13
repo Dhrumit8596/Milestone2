@@ -23,6 +23,7 @@ import disk.DiskInvertedIndex;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -70,13 +71,13 @@ public class RankedRetrievalsTestTfIdf {
         System.out.println("Test Case I Complete");
         String query = "this";    
         double[] expAccum = new double[10];
-        expAccum[0] = 0.25541281188299536;
-        expAccum[1] = 0.25541281188299536;
-        expAccum[3] = 0.16153724582767698;
+        expAccum[0] = 0.255;
+        expAccum[1] = 0.255;
+        expAccum[2] = 0.162;
         String[] expDocs = new String[10];
         expDocs[0] = "Document3";
         expDocs[1] = "Document5";
-        expDocs[3] = "Document1";
+        expDocs[2] = "Document1";
         String docs = "";
 
         int j = 0;
@@ -88,11 +89,10 @@ public class RankedRetrievalsTestTfIdf {
             j++;
             Posting posting = p.getPosting();
             accumulator = p.getAccumulator();
-//            System.out.println("Accum value - " + accumulator);
             docs = corpus.getDocument(posting.getDocumentId()).getTitle();
                 System.out.println(docs + " :: Accum value - " + accumulator);
             if (docs.equals(expDocs[j])) {
-                    assertEquals(accumulator+"", expAccum[j]+"");
+                    assertEquals((new DecimalFormat("#0.000").format(accumulator)) + "", expAccum + "");
                 
             }
         }
@@ -101,7 +101,7 @@ public class RankedRetrievalsTestTfIdf {
     public void testGetPostingsTwo() throws IOException {
         System.out.println("Test Case II Complete");
         String query = "Hello";
-        double expAccum = 0.5089489555918387;
+        double expAccum = 0.509;
         String expDocs = "";
         expDocs = "Document1";
         String docs = "";
@@ -116,9 +116,8 @@ public class RankedRetrievalsTestTfIdf {
             Posting posting = p.getPosting();
             accumulator = p.getAccumulator();
             docs = corpus.getDocument(posting.getDocumentId()).getTitle();
-            System.out.println(docs + " :: Accum value - " + accumulator);
             if (docs.equals(expDocs)) {
-                assertEquals(accumulator + "", expAccum + "");
+                assertEquals((new DecimalFormat("#0.000").format(accumulator)) + "", expAccum + "");
             }
         }
     }

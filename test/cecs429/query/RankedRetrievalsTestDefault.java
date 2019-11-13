@@ -16,17 +16,15 @@ import cecs429.index.Posting;
 import cecs429.index.PostingAccumulator;
 import cecs429.text.AdvancedTokenProcessor;
 import cecs429.text.EnglishTokenStream;
-import csulb.DirectorySearch;
 import disk.DiskIndexWriter;
 import disk.DiskInvertedIndex;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -67,16 +65,16 @@ public class RankedRetrievalsTestDefault {
     @Test
     public void testGetPostings() throws IOException {
         System.out.println("Test Case I Complete");
-        String query = "this";    
+        String query = "this";
         String expResult = "Document3Document5Document1";
         double[] expAccum = new double[10];
-        expAccum[0] = 0.49041462650586315;
-        expAccum[1] = 0.49041462650586315;
-        expAccum[3] = 0.3101654435238621;
+        expAccum[0] = 0.490;
+        expAccum[1] = 0.490;
+        expAccum[2] = 0.310;
         String[] expDocs = new String[10];
         expDocs[0] = "Document3";
         expDocs[1] = "Document5";
-        expDocs[3] = "Document1";
+        expDocs[2] = "Document1";
         String docs = "";
 
         int j = 0;
@@ -88,12 +86,10 @@ public class RankedRetrievalsTestDefault {
             j++;
             Posting posting = p.getPosting();
             accumulator = p.getAccumulator();
-//            System.out.println("Accum value - " + accumulator);
             docs = corpus.getDocument(posting.getDocumentId()).getTitle();
-                System.out.println(docs + " :: Accum value - " + accumulator);
             if (docs.equals(expDocs[j])) {
-                    assertEquals(accumulator+"", expAccum[j]+"");
-                
+                assertEquals((new DecimalFormat("#0.000").format(accumulator)) + "", expAccum + "");
+
             }
         }
     }
@@ -102,7 +98,7 @@ public class RankedRetrievalsTestDefault {
     public void testGetPostingsTwo() throws IOException {
         System.out.println("Test Case II Complete");
         String query = "Hello";
-        double expAccum = 0.5666040941935031;
+        double expAccum = 0.567;
         String expDocs = "";
         expDocs = "Document1";
         String docs = "";
@@ -117,12 +113,12 @@ public class RankedRetrievalsTestDefault {
             Posting posting = p.getPosting();
             accumulator = p.getAccumulator();
             docs = corpus.getDocument(posting.getDocumentId()).getTitle();
-            System.out.println(docs + " :: Accum value - " + accumulator);
             if (docs.equals(expDocs)) {
-                assertEquals(accumulator + "", expAccum + "");
+                assertEquals((new DecimalFormat("#0.000").format(accumulator)) + "", expAccum + "");
             }
         }
     }
+
     private static List<PostingAccumulator> mMethod(String query) throws IOException {
         DirectoryCorpus corpus = DirectoryCorpus.loadJsonDirectory(Paths.get(mPath).toAbsolutePath(), ".json");
         corpus = DirectoryCorpus.loadJsonDirectory(Paths.get(mPath).toAbsolutePath(), ".json");
