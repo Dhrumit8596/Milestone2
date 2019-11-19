@@ -92,7 +92,7 @@ public class InvertedIndexTest {
         assertEquals(expResult.trim(), results.trim());
     }
 
-    private static String mPath = "C:\\Users\\dipes\\Documents\\NetBeansProjects\\Seach Engine Technology\\Milestone2\\test";
+    private static String mPath = "test\\";
 
     private static String mMethod(String query) throws IOException {
 

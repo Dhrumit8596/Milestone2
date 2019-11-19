@@ -44,7 +44,7 @@ import static org.junit.Assert.*;
  */
 public class RankedRetrievalsTestOkapi {
 
-    private static String mPath = "C:\\Users\\dipes\\Documents\\NetBeansProjects\\Seach Engine Technology\\Milestone2\\test";
+    private static String mPath = "test\\";
 
     public RankedRetrievalsTestOkapi() {
     }

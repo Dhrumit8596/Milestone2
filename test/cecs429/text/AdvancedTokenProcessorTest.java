@@ -58,6 +58,7 @@ public class AdvancedTokenProcessorTest {
     /**
      * Test of processToken method, of class AdvancedTokenProcessor.
      */
+    private static String mPath = "test\\";
     @Test
     public void testProcessToken() throws IOException {
         System.out.println("Advance Token Processor Case I Complete");
@@ -79,7 +80,7 @@ public class AdvancedTokenProcessorTest {
     @Test
     public void testProcessTokenThree() throws IOException {
         System.out.println("Advance Token Processor Case III Complete");
-        DocumentCorpus corpus = DirectoryCorpus.loadJsonDirectory(Paths.get("C:\\Users\\dipes\\Desktop\\Unit Test\\JSON").toAbsolutePath(), ".json");
+        DocumentCorpus corpus = DirectoryCorpus.loadJsonDirectory(Paths.get(mPath).toAbsolutePath(), ".json");
         String query = "first-Document!!";
         String expResult = "Document1";
         String results = mMethod(query);
@@ -103,7 +104,7 @@ public class AdvancedTokenProcessorTest {
         String results = mMethod(query);
         assertEquals(expResult.trim(), results.trim());
     }
-    private static String mPath = "C:\\Users\\dipes\\Documents\\NetBeansProjects\\Seach Engine Technology\\Milestone2\\test";
+    
 
     private static String mMethod(String query) throws IOException {
 
